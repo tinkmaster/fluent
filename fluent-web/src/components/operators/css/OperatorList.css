@@ -1,0 +1,40 @@
+.operator-list {
+    margin-left: auto;
+    width: 25%;
+    box-shadow: -5px -1px 5px 0px #e4e3e3;;
+    overflow: auto;
+}
+
+.operator-list .ant-popover-inner-content {
+    background-color: #c68686
+}
+
+.operator-list-title {
+    padding-left: 18px;
+    font-weight: bold;
+    font-size: large;
+    display: flex;
+}
+
+.operator-list-item {
+    padding-left: 18px;
+    padding-right: 18px;
+    display: flex;
+}
+
+.operator-list-item-icon {
+    display: none;
+}
+
+.operator-list-item:hover {
+    background: grey;
+}
+
+.operator-list-item:hover .operator-list-item-icon {
+    display: block;
+}
+
+.operator-list-item-icon:hover {
+    color: white;
+}
+

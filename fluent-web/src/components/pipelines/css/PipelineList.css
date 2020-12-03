@@ -1,0 +1,36 @@
+.pipeline-list {
+    width: 25%;
+    height: 100%;
+    overflow: auto;
+    box-shadow: 5px 2px 5px 0px #e4e3e3;
+    z-index: 100;
+}
+
+.pipeline-list-title {
+    padding-left: 18px;
+    font-weight: bold;
+    font-size: large;
+    display: flex;
+    line-height: 24px
+}
+
+.pipeline-list-item {
+    padding-left: 18px;
+    display: flex;
+}
+
+.pipeline-list-item-icon {
+    display: none;
+}
+
+.pipeline-list-item:hover {
+    background: #e1e1e1;
+}
+
+.pipeline-list-item:hover .pipeline-list-item-icon {
+    display: block;
+}
+
+.pipeline-list-item-icon:hover {
+    color: white;
+}

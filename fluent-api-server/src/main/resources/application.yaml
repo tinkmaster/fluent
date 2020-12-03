@@ -1,0 +1,17 @@
+spring:
+  profiles:
+    active: default
+management:
+  endpoint:
+    health:
+      show-details: always
+  endpoints:
+    web:
+      exposure:
+        include: '*'
+
+timezone: Asia/Shanghai
+
+logging:
+  level:
+    root: INFO

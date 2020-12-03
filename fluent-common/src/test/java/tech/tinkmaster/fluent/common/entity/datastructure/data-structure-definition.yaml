@@ -1,0 +1,19 @@
+apiVersion: v1
+kind: DataStructureDefinition
+metadata:
+  namespace: default
+  name: dsd
+  creationTimestamp: 2020-11-17 01:55:55
+  modificationTimestamp: 2020-11-17 01:55:55
+  labels:
+    - label1: value
+  annotations:
+    - anntation1: value
+  resourceVersion: 1
+spec:
+  fields:
+    - name: field1
+      required: true
+      description: No description
+      type: NUMBER
+      defaults: 238470

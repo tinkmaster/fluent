@@ -1,0 +1,13 @@
+data:
+  dir: database
+
+spring:
+  data:
+    mongodb:
+      host: 192.168.1.118
+      port: 18002
+      username: fluentadmin
+      password: asd0o2pwksd
+      database: fluent
+      authenticationDatabase: fluent
+      url: mongodb://192.168.1.118:18002/fluent

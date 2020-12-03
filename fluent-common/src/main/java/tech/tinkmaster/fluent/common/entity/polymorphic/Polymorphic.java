@@ -1,0 +1,40 @@
+package tech.tinkmaster.fluent.common.entity.polymorphic;
+
+import com.fasterxml.jackson.annotation.JsonIgnore;
+import com.fasterxml.jackson.annotation.JsonPropertyOrder;
+import com.fasterxml.jackson.annotation.JsonTypeInfo;
+
+@JsonTypeInfo(
+    use = JsonTypeInfo.Id.NAME,
+    include = JsonTypeInfo.As.EXISTING_PROPERTY,
+    property = "kind",
+    visible = true)
+@JsonPropertyOrder("kind")
+public interface Polymorphic {
+  String getKind();
+
+  /**
+   * This is an unused setter to overcome an issue with Jackson when we use it with subtypes,
+   * JsonTypeInfo.As.EXISTING_PROPERTY, and DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES which
+   * causes Jackson to fail deserializing polymorphic types.
+   */
+  void setKind(String ignored);
+
+  /**
+   * Cast this method as an instance of a given class.
+   *
+   * <p>A convenience method for inline casting.
+   */
+  @JsonIgnore
+  default <T> T as(Class<T> klass) {
+    if (!klass.isInstance(this)) {
+      throw new IllegalArgumentException("Wrong kind " + getKind());
+    }
+    return klass.cast(this);
+  }
+
+  @JsonIgnore
+  default boolean is(Class klass) {
+    return klass.isInstance(this);
+  }
+}

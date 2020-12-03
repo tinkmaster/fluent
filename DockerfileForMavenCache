@@ -1,0 +1,50 @@
+FROM maven:3.5.3-jdk-8 AS initial-maven-base
+LABEL tech.tinkmaster.title="tink-master-fluent-stage-initial-maven-base"
+LABEL tech.tinkmaster.description="Initial maven-base stage of Fluent® multi-stage docker build"
+RUN apt-get update \
+  && rm -rf /var/lib/apt/lists/*
+WORKDIR /usr/src/fluent-maven
+
+# Here below are layer for cache maven repository
+from initial-maven-base AS maven-repository-cached-base
+WORKDIR /usr/src/fluent-maven
+COPY pom.xml                    /usr/src/fluent-maven/pom.xml
+COPY fluent-api-service/pom.xml        /usr/src/fluent-maven/fluent-api-service/pom.xml
+COPY fluent-api-server/pom.xml /usr/src/fluent-maven/fluent-api-server/pom.xml
+COPY fluent-dist/pom.xml       /usr/src/fluent-maven/fluent-dist/pom.xml
+COPY fluent-common/pom.xml      /usr/src/fluent-maven/fluent-common/pom.xml
+COPY fluent-core/pom.xml      /usr/src/fluent-maven/fluent-core/pom.xml
+COPY fluent-persistence/pom.xml      /usr/src/fluent-maven/fluent-persistence/pom.xml
+COPY fluent-web/pom.xml      /usr/src/fluent-maven/fluent-web/pom.xml
+
+RUN mvn  \
+        de.qaware.maven:go-offline-maven-plugin:1.1.0:resolve-dependencies \
+        -Dmaven.repo.local=/usr/src/fluent-maven/.m2/repository && \
+    mvn  \
+        -f fluent-common/pom.xml \
+        de.qaware.maven:go-offline-maven-plugin:1.1.0:resolve-dependencies \
+        -Dmaven.repo.local=/usr/src/fluent-maven/.m2/repository && \
+    mvn  \
+        -f fluent-core/pom.xml \
+        de.qaware.maven:go-offline-maven-plugin:1.1.0:resolve-dependencies \
+        -Dmaven.repo.local=/usr/src/fluent-maven/.m2/repository && \
+    mvn  \
+        -f fluent-persistence/pom.xml \
+        de.qaware.maven:go-offline-maven-plugin:1.1.0:resolve-dependencies \
+        -Dmaven.repo.local=/usr/src/fluent-maven/.m2/repository && \
+    mvn  \
+        -f fluent-dist/pom.xml \
+        de.qaware.maven:go-offline-maven-plugin:1.1.0:resolve-dependencies \
+        -Dmaven.repo.local=/usr/src/fluent-maven/.m2/repository && \
+    mvn  \
+            -f fluent-api-server/pom.xml \
+            de.qaware.maven:go-offline-maven-plugin:1.1.0:resolve-dependencies \
+            -Dmaven.repo.local=/usr/src/fluent-maven/.m2/repository && \
+    mvn  \
+            -f fluent-api-service/pom.xml \
+            de.qaware.maven:go-offline-maven-plugin:1.1.0:resolve-dependencies \
+            -Dmaven.repo.local=/usr/src/fluent-maven/.m2/repository && \
+    mvn  \
+        -f fluent-web/pom.xml \
+        de.qaware.maven:go-offline-maven-plugin:1.1.0:resolve-dependencies \
+        -Dmaven.repo.local=/usr/src/fluent-maven/.m2/repository
