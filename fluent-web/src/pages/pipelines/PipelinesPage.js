@@ -109,7 +109,6 @@ export class PipelinesPage extends React.Component {
             this.props.operators.sort()
         }
 
-        console.log(this.props)
         return (
             <div className="pipeline-page-overview">
                 <PipelineList

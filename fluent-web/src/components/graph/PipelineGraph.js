@@ -13,7 +13,6 @@ export class PipelineGraph extends React.Component {
     }
 
     onConnect = (params) => {
-        console.log(params)
         params['type'] = 'custom'
         params['arrowHeadType'] = 'arrowclosed'
         this.props.updateGraph(addEdge(params, this.props.pipelineData))

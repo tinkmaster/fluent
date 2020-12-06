@@ -3,6 +3,7 @@ import {GET_EXECUTION_ADDRESS, LIST_EXECUTION_ADDRESS, POST_EXECUTION_ADDRESS} f
 import {message} from "antd";
 import {getExecutionDiagramListAction, listExecutionDiagramListAction} from "../pages/pipelines/PipelinesPageReducer";
 import {updatePipelinePageState} from "../pages/pipelines/PipelinesPageReduxContainer";
+import {drawExecutionGraph} from "./GraphService";
 
 
 export function createExecutionDiagram(value) {
@@ -37,45 +38,7 @@ export function getExecutionDiagram(pipelineName, name) {
             response => {
                 if (response.data.code === 200) {
                     dispatch(getExecutionDiagramListAction(response.data.data));
-                    let res = []
-                    const nodes = response.data.data.nodes
-                    const ids = Object.keys(nodes);
-                    for (let i = 0; i < ids.length; i++) {
-                        let obj = {}
-                        Object.assign(obj, {
-                            id: ids[i],
-                            data: {
-                                label: ids[i] + '-' + nodes[ids[i]].operator.name,
-                                name: nodes[ids[i]].operator.name,
-                                usedTime: nodes[ids[i]].usedTime
-                            },
-                            position: {x: 200 + 100 * i, y: 70 * i}
-                        })
-                        if (nodes[ids[i]].status === 'RUNNING') {
-                            obj['type'] = 'runningNode'
-                        } else if (nodes[ids[i]].status === 'FAILED') {
-                            obj['type'] = 'errorNode'
-                        } else if (nodes[ids[i]].status === 'FINISHED') {
-                            obj['type'] = 'finishedNode'
-                        } else {
-                            obj['type'] = 'todoNode'
-                        }
-                        res.push(obj)
-                        for (let j = 0; j < nodes[ids[i]].next.length; j++) {
-                            res.push(
-                                {
-                                    id: ids[i] + '->' + nodes[ids[i]].next[j],
-                                    source: ids[i],
-                                    target: nodes[ids[i]].next[j],
-                                    sourceHandler: null,
-                                    targetHandler: null,
-                                    arrowHeadType: 'arrowclosed',
-                                    type: 'custom'
-                                }
-                            )
-                        }
-                    }
-                    console.log(res)
+                    const res = drawExecutionGraph(response.data.data)
                     dispatch(updatePipelinePageState(['executionData', res]))
                 }
             }

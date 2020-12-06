@@ -47,8 +47,6 @@ export class OperatorDetails extends Component {
 
 
     render() {
-        console.log(this.props)
-
         return (
             <Modal
                 title="OperatorDetails"
