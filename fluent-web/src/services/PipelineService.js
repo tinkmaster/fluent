@@ -13,6 +13,7 @@ import {
     updatePipelineGraph
 } from "../pages/pipelines/PipelinesPageReducer";
 import React from "react";
+import {drawPipelineGraph} from "./GraphService";
 
 export function listPipelines() {
     return dispatch => {
@@ -33,35 +34,7 @@ export function selectPipeline(name) {
                     dispatch(editPipelineAction(response.data.data));
 
                     if (response.data.data && response.data.data.operators) {
-                        const pipeline = response.data.data
-                        let res = []
-                        let i = 80;
-                        const ids = Object.keys(pipeline.operators)
-                        ids.map(v => {
-                                res.push({
-                                    id: v,
-                                    data: {label: v + '-' + pipeline.operators[v], name: pipeline.operators[v]},
-                                    type: 'pipelineNode',
-                                    position: {x: 200 + i, y: i}
-                                });
-                                i = i + 100
-                            }
-                        )
-                        pipeline.connections.map(v => {
-                            const ns = v.split('->');
-                            res.push({
-                                id: ns[0] + '->' + ns[1],
-                                source: ns[0],
-                                target: ns[1],
-                                sourceHandler: null,
-                                targetHandler: null,
-                                type: 'custom',
-                                arrowHeadType: 'arrowclosed',
-                            })
-                        })
-
-                        console.log(res)
-
+                        const res = drawPipelineGraph(response.data.data)
                         dispatch(updatePipelineGraph(res))
                     } else {
                         dispatch(updatePipelineGraph([]))

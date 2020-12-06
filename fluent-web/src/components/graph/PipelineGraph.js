@@ -1,7 +1,7 @@
 import React from "react";
 
 import {nodeTypes} from "./DataFlowNodeTypes";
-import ReactFlow, {addEdge, Background, Controls, isEdge, isNode, MiniMap, removeElements} from "react-flow-renderer";
+import ReactFlow, {addEdge, Controls, isEdge, isNode, MiniMap, removeElements} from "react-flow-renderer";
 import {Button, Col, Row} from "antd";
 import {edgeTypes} from "./DataFlowEdgeType";
 
@@ -96,7 +96,6 @@ export class PipelineGraph extends React.Component {
                     </Row>
                 </div>
                 <Controls/>
-                <Background/>
             </ReactFlow>
         )
     }

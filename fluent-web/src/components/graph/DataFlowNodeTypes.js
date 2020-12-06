@@ -56,7 +56,7 @@ export const finishedNode = memo(({data}) => {
         <div style={{
             border: '2px solid black',
             borderRadius: 6,
-            padding: "12px 30px",
+            padding: "6px 30px",
             minWidth: '180px'
         }}>
             <Handle

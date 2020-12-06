@@ -26,7 +26,7 @@ function drawNextNodes(data, parentId, id, pathLength, branchesNum, res, nodesHa
                 name: node.operator.name,
                 usedTime: node.usedTime
             },
-            position: {x: 250 * pathLength, y: 100 * branchesNum['num']}
+            position: {x: 250 * pathLength, y: 80 * (branchesNum['num'] - 0.5)}
         })
         if (node.status === 'RUNNING') {
             obj['type'] = 'runningNode'
@@ -59,7 +59,7 @@ function drawNextNodes(data, parentId, id, pathLength, branchesNum, res, nodesHa
         let connectionExisted = false
         for (let i = 0; i < res.length; i++) {
             if (res[i].id === id) {
-                res[i].position = {x: 250 * pathLength, y: 100 * branchesNum['num']}
+                res[i].position = {x: 250 * pathLength, y: 80 * (branchesNum['num'] - 1)}
             }
             if (res[i].id === parentId + '->' + id) {
                 connectionExisted = true
@@ -89,4 +89,37 @@ function drawNextNodes(data, parentId, id, pathLength, branchesNum, res, nodesHa
             drawNextNodes(data, id, node.next[i], pathLength + 1, branchesNum, res, nodesHaveDrawn);
         }
     }
+}
+
+
+export function drawPipelineGraph(data) {
+    let sources = []
+    let nodes = {}
+
+    const ids = Object.keys(data.operators)
+    ids.map(id => {
+            nodes[id] = {
+                next: [],
+                upstream: [],
+                operator: {
+                    name: data.operators[id]
+                }
+            }
+        }
+    )
+
+    data.connections.map(con => {
+        const ns = con.split('->')
+        nodes[parseInt(ns[0])].next.push(parseInt(ns[1]))
+        nodes[parseInt(ns[1])].upstream.push(parseInt(ns[0]))
+    })
+
+    ids.map(id => {
+            if (nodes[id].upstream.length === 0) {
+                sources.push(id)
+            }
+        }
+    )
+
+    return drawExecutionGraph({sources: sources, nodes: nodes});
 }

@@ -1,7 +1,7 @@
 import React from "react";
 import {edgeTypes} from "./DataFlowEdgeType";
 import {nodeTypes} from "./DataFlowNodeTypes";
-import ReactFlow, {Background, Controls, MiniMap} from "react-flow-renderer";
+import ReactFlow, {Controls, MiniMap} from "react-flow-renderer";
 
 
 export class ExecutionGraph extends React.Component {
@@ -15,7 +15,6 @@ export class ExecutionGraph extends React.Component {
             <ReactFlow
                 elements={this.props.executionData}
                 nodesConnectable={false}
-                nodesDraggable={false}
                 nodeTypes={nodeTypes}
                 edgeTypes={edgeTypes}
                 onElementClick={(event, element) =>
@@ -58,7 +57,6 @@ export class ExecutionGraph extends React.Component {
                 {/*    </Row>*/}
                 {/*</div>*/}
                 <Controls/>
-                <Background/>
             </ReactFlow>
         )
     }

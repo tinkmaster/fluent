@@ -10,6 +10,7 @@ import {PipelineList} from "../../components/pipelines/PipelineList";
 import {ExecutionHistoryList} from "../../components/executions/ExecutionHistoryList";
 import {ExecutionHistoryOverview} from "../../components/executions/ExecutionHistoryOverview";
 import {ExecutionNodeInfo} from "../../components/executions/ExecutionNodeInfo";
+import {Empty} from "antd";
 
 export class PipelinesPage extends React.Component {
 
@@ -34,6 +35,8 @@ export class PipelinesPage extends React.Component {
     componentWillUnmount() {
         clearInterval(this.refreshTime)
         clearInterval(this.refreshHistoryTime)
+        this.refreshTime = null
+        this.refreshHistoryTime = null
         this.props.updatePipelinePageState('executionData', null,
             'selectedHistory', null, "selectedHistoryNode", null)
     }
@@ -61,6 +64,7 @@ export class PipelinesPage extends React.Component {
     selectPipeline = (name) => {
         this.props.selectPipeline(name)
         clearInterval(this.refreshHistoryTime)
+        this.refreshHistoryTime = null
         if (!this.refreshTime) {
             this.refreshTime = setInterval(() => this.refreshHistoryList(), 3000)
         }
@@ -131,7 +135,17 @@ export class PipelinesPage extends React.Component {
                         width: '100%'
                     }}>
                         {!this.props.selectedPipeline ?
-                            "Please select pipeline first"
+                            <div style={{
+                                textAlign: 'center',
+                                margin: 'auto',
+                                height: '100%',
+                                marginTop: '20%'
+                            }}><Empty
+                                description={
+                                    <span>Please select pipeline in the left SideBar first</span>
+                                }
+                            >
+                            </Empty></div>
                             :
                             this.props.selectedHistory && this.props.executionData ?
                                 <ExecutionGraph

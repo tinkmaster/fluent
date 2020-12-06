@@ -51,7 +51,7 @@ export const PipelinePageReducer = (state, action) => {
                             name: action.data.name
                         },
                         type: 'pipelineNode',
-                        position: {x: 200, y: 200}
+                        position: {x: 200, y: 600}
                     }].concat(state.pipelineData ? state.pipelineData : []),
                 )
             }
