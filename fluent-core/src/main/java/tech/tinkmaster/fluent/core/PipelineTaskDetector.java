@@ -1,4 +1,4 @@
-package tech.tinkmaster.fluent.core.pipeline;
+package tech.tinkmaster.fluent.core;
 
 import java.io.IOException;
 import java.util.List;

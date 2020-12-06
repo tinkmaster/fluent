@@ -1,0 +1,17 @@
+**/.idea
+**/.log*
+**/data-dir
+**/logs
+scripts
+**/scripts
+**/target
+.DS_Store
+.github
+
+# Front-end javascript specific stuff
+**/.npm
+**/build
+**/etc
+**/node
+**/node_modules
+database/

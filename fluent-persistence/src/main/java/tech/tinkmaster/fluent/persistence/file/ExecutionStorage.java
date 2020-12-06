@@ -1,23 +1,22 @@
 package tech.tinkmaster.fluent.persistence.file;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
+import org.apache.commons.io.FileUtils;
+import org.springframework.beans.factory.annotation.Value;
+import org.springframework.stereotype.Component;
+import tech.tinkmaster.fluent.common.FluentObjectMappers;
+import tech.tinkmaster.fluent.common.entity.execution.ExecutionDiagram;
+
+import javax.annotation.PostConstruct;
 import java.io.File;
 import java.io.IOException;
 import java.nio.charset.Charset;
 import java.nio.file.Files;
 import java.nio.file.Paths;
 import java.util.Collections;
-import java.util.LinkedList;
 import java.util.List;
 import java.util.Stack;
 import java.util.stream.Collectors;
-import javax.annotation.PostConstruct;
-import org.apache.commons.io.FileUtils;
-import org.springframework.beans.factory.annotation.Value;
-import org.springframework.stereotype.Component;
-import tech.tinkmaster.fluent.common.FluentObjectMappers;
-import tech.tinkmaster.fluent.common.entity.execution.ExecutionDiagram;
-import tech.tinkmaster.fluent.common.entity.execution.ExecutionDiagramNode;
 
 /** ${base}/namespaces/default/executions/${name} */
 @Component
@@ -36,8 +35,7 @@ public class ExecutionStorage {
   public List<String> list(String pipelineName) {
     File file = Paths.get(this.baseDir, this.getExecutionDiagramFilePath(), pipelineName).toFile();
     if (file.exists() && file.isDirectory()) {
-      return FileUtils.listFiles(file, null, false)
-          .stream()
+      return FileUtils.listFiles(file, null, false).stream()
           .map(File::getName)
           .collect(Collectors.toList());
     } else {
@@ -52,14 +50,6 @@ public class ExecutionStorage {
       ExecutionDiagram diagram =
           this.mappers.readValue(
               FileUtils.readFileToString(file, Charset.defaultCharset()), ExecutionDiagram.class);
-      if (diagram != null && diagram.currentNode != null && diagram.getNodes() != null) {
-        diagram.currentNode = diagram.nodes.get(diagram.currentNode.id);
-      }
-      if (diagram != null && diagram.sources != null && diagram.getNodes() != null) {
-        List<ExecutionDiagramNode> nodes = new LinkedList<>();
-        diagram.sources.forEach(n -> nodes.add(diagram.nodes.get(n.id)));
-        diagram.sources = nodes;
-      }
       return diagram;
     } else {
       return null;

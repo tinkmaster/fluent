@@ -1,10 +1,11 @@
 package tech.tinkmaster.fluent.common.entity.execution;
 
-import java.util.*;
 import tech.tinkmaster.fluent.common.entity.operator.Operator;
 
+import java.util.*;
+
 public class ExecutionDiagramNode {
-  public int id;
+  public Integer id;
   public List<Integer> upstreamNodes;
   public List<Integer> next;
   public Operator operator;

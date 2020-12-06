@@ -1,11 +1,5 @@
-package tech.tinkmaster.fluent.core.pipeline.scheduler.executors;
+package tech.tinkmaster.fluent.core.scheduler.executors;
 
-import java.io.IOException;
-import java.net.URI;
-import java.net.URISyntaxException;
-import java.util.Arrays;
-import java.util.HashMap;
-import java.util.Map;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import tech.tinkmaster.fluent.common.entity.operator.Operator;
@@ -13,17 +7,21 @@ import tech.tinkmaster.fluent.common.util.http.http.FluentHttpMethod;
 import tech.tinkmaster.fluent.common.util.http.http.FluentHttpPortal;
 import tech.tinkmaster.fluent.common.util.http.http.FluentHttpRequest;
 import tech.tinkmaster.fluent.common.util.http.http.FluentHttpResponse;
-import tech.tinkmaster.fluent.core.pipeline.ExecutionSchedulerContext;
+
+import java.io.IOException;
+import java.net.URI;
+import java.net.URISyntaxException;
+import java.util.Arrays;
+import java.util.HashMap;
+import java.util.Map;
 
 public class HttpOperatorExecutor implements OperatorExecutor {
   private static final Logger LOG = LoggerFactory.getLogger(HttpOperatorExecutor.class);
-  ExecutionSchedulerContext context;
   Operator operator;
 
   FluentHttpRequest request;
 
-  public HttpOperatorExecutor(ExecutionSchedulerContext context, Operator operator) {
-    this.context = context;
+  public HttpOperatorExecutor(Operator operator) {
     this.operator = operator;
 
     Map<String, String> parameters = operator.getParams();
@@ -73,11 +71,6 @@ public class HttpOperatorExecutor implements OperatorExecutor {
   @Override
   public Class returnType() {
     return FluentHttpResponse.class;
-  }
-
-  @Override
-  public ExecutionSchedulerContext getContext() {
-    return this.context;
   }
 
   @Override

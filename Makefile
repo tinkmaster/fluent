@@ -77,6 +77,7 @@ xml-format:
 	exit $$notPretty;
 
 tools/google-java-format.jar:
+	mkdir -p tools && \
 	wget \
 	  https://github.com/google/google-java-format/releases/download/google-java-format-$(GOOGLE_JAVA_FORMAT)/google-java-format-$(GOOGLE_JAVA_FORMAT)-all-deps.jar \
 	  -O tools/google-java-format.jar

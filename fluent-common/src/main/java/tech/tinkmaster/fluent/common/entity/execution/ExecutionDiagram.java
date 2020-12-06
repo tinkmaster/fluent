@@ -1,33 +1,35 @@
 package tech.tinkmaster.fluent.common.entity.execution;
 
-import java.text.SimpleDateFormat;
-import java.util.*;
 import lombok.Getter;
 import lombok.Setter;
 import org.apache.commons.lang3.tuple.Pair;
 import tech.tinkmaster.fluent.common.entity.operator.Operator;
+
+import java.text.SimpleDateFormat;
+import java.util.*;
 
 @Getter
 @Setter
 public class ExecutionDiagram {
   public String name;
   public String pipelineName;
-  public List<ExecutionDiagramNode> sources;
+  public String pipelineGroupName;
+  public List<Integer> sources;
   public Map<Integer, ExecutionDiagramNode> nodes;
-  public ExecutionDiagramNode currentNode;
+  public Integer currentNode;
   public ExecutionStatus status;
   public Date createdTime;
-  public Map<String, String> result;
+  public Map<String, String> results;
 
   public ExecutionDiagram() {
-    this.result = new HashMap<>();
+    this.results = new HashMap<>();
   }
 
   public ExecutionDiagram(String name, String pipelineName, Date createdTime) {
     this.name = name;
     this.pipelineName = pipelineName;
     this.createdTime = createdTime;
-    this.result = new HashMap<>();
+    this.results = new HashMap<>();
   }
 
   public ExecutionDiagram(
@@ -46,11 +48,11 @@ public class ExecutionDiagram {
           nodes.get(value.getValue()).addUpper(nodes.get(value.getKey()));
         });
 
-    List<ExecutionDiagramNode> sources = new LinkedList<>();
+    List<Integer> sources = new LinkedList<>();
     nodes.forEach(
         (k, v) -> {
           if (v.upstreamNodes.size() == 0) {
-            sources.add(v);
+            sources.add(v.id);
           }
         });
 
@@ -63,67 +65,92 @@ public class ExecutionDiagram {
     this.createdTime = new Date();
   }
 
-  public ExecutionDiagramNode findNextNodeToRun() {
-    if (this.currentNode != null
-        && (this.currentNode.status == ExecutionStatus.RUNNING
-            || this.currentNode.status == ExecutionStatus.WAITING_TO_BE_SCHEDULED)) {
-      return this.currentNode;
+  public Integer findNextNodeToRun() {
+    HashMap<Integer, Boolean> nodesHaveBeenExecuted = new HashMap<>();
+    this.nodes.forEach(
+        (id, node) -> {
+          if (node.status == ExecutionStatus.FINISHED) {
+            nodesHaveBeenExecuted.put(id, Boolean.TRUE);
+          }
+        });
+    ExecutionDiagramNode res = new ExecutionDiagramNode();
+    res.id = null;
+    this.nodes.forEach(
+        (id, node) -> {
+          if (node.status == ExecutionStatus.RUNNING
+              || node.status == ExecutionStatus.CREATED
+              || node.status == ExecutionStatus.WAITING_TO_BE_SCHEDULED) {
+            if (node.upstreamNodes.size() == 0
+                || node.upstreamNodes.stream()
+                    .allMatch(
+                        upstreamNodeId -> nodesHaveBeenExecuted.get(upstreamNodeId) != null)) {
+              res.id = id;
+            }
+          }
+        });
+
+    return res.id;
+  }
+
+  public boolean checkIfHasCircle() {
+    Map<Integer, Boolean> nodesHaveBeenReviewed = new HashMap<>();
+    Map<Integer, Boolean> nodesForDetection = new HashMap<>();
+    for (int i = 0; i < this.sources.size(); i++) {
+      ExecutionDiagramNode node = this.nodes.get(this.sources.get(i));
+      Map<Integer, Boolean> nodes = new HashMap<>();
+      if (this.detectCircle(node, nodes, nodesForDetection)) {
+        return true;
+      }
+      nodes.forEach((k, v) -> nodesHaveBeenReviewed.put(k, null));
     }
-    if (this.status == ExecutionStatus.FINISHED || this.status == ExecutionStatus.FAILED) {
+    return nodesHaveBeenReviewed.size() != this.nodes.size();
+  }
+
+  private boolean detectCircle(
+      ExecutionDiagramNode node,
+      Map<Integer, Boolean> nodesHaveBeenReviewed,
+      Map<Integer, Boolean> nodesForDetection) {
+    if (nodesForDetection.get(node.id) != null) {
+      return true;
+    } else {
+      nodesForDetection.put(node.id, Boolean.TRUE);
+      nodesHaveBeenReviewed.put(node.id, Boolean.TRUE);
+    }
+    for (int i = 0; i < node.next.size(); i++) {
+      Map<Integer, Boolean> nodes = new HashMap<>(nodesForDetection);
+      if (this.detectCircle(this.nodes.get(node.next.get(i)), nodesHaveBeenReviewed, nodes)) {
+        return true;
+      }
+    }
+    return false;
+  }
+
+  private ExecutionDiagramNode getNode(Integer id) {
+    if (id == null) {
       return null;
     }
+    return this.nodes.get(id);
+  }
 
-    if (this.currentNode == null) {
-      this.currentNode =
-          this.sources
-              .stream()
-              .filter(
-                  node ->
-                      node.status != ExecutionStatus.FINISHED
-                          && node.status != ExecutionStatus.FAILED)
-              .findFirst()
-              .orElse(null);
-      if (this.currentNode == null) {
-        this.status = ExecutionStatus.FINISHED;
-        return null;
-      } else {
-        return this.currentNode;
-      }
+  private ExecutionStatus getStatus(Integer id) {
+    if (id == null) {
+      return null;
     }
+    return this.nodes.get(id).status;
+  }
 
-    if (this.currentNode.next == null || this.currentNode.next.size() == 0) {
-      // firstly check if all source nodes have been in FINISHED status
-      ExecutionDiagramNode nodeToRun =
-          this.sources
-              .stream()
-              .filter(
-                  n ->
-                      n.status == ExecutionStatus.CREATED
-                          || n.status == ExecutionStatus.WAITING_TO_BE_SCHEDULED)
-              .findFirst()
-              .orElse(null);
-      if (nodeToRun == null) {
-        this.status = ExecutionStatus.FINISHED;
-        return null;
-      } else {
-        this.currentNode = nodeToRun;
-        return this.currentNode;
-      }
-    } else {
-      this.currentNode =
-          this.nodes.get(
-              this.currentNode
-                  .next
-                  .stream()
-                  .filter(
-                      v ->
-                          this.nodes.get(v).status == ExecutionStatus.CREATED
-                              || this.nodes.get(v).status
-                                  == ExecutionStatus.WAITING_TO_BE_SCHEDULED)
-                  .findFirst()
-                  .orElse(null));
+  private List<Integer> getNodeNext(Integer id) {
+    if (id == null) {
+      return Collections.emptyList();
     }
-    this.currentNode.status = ExecutionStatus.WAITING_TO_BE_SCHEDULED;
-    return this.currentNode;
+    return this.nodes.get(id).next;
+  }
+
+  private void setCurrentNode(Integer id) {
+    this.currentNode = id;
+  }
+
+  private void setCurrentNodeStatus(ExecutionStatus status) {
+    this.getNode(this.currentNode).status = status;
   }
 }

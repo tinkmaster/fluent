@@ -1,0 +1,27 @@
+# Mac
+.DS_STORE
+
+# Maven
+target/
+pom.xml.versionsBackup
+dependency-reduced-pom.xml
+buildNumber.properties
+.mvn/timing.properties
+
+# IntelliJ IDEA
+.idea
+*.iml
+
+## Plugin-specific files:
+toolbox-api-server/src/main/resources/.version.properties
+
+# IntelliJ
+/out/
+
+database/
+
+# Build related files
+tools/google-java-format.jar
+
+#docker build
+.imageid*

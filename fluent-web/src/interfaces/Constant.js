@@ -1,4 +1,4 @@
-export const SERVER_ADDRESS = "http://localhost:8080"
+export const SERVER_ADDRESS = document.location.href.includes('localhost') ? "http://localhost:8080" : ""
 
 export const LIST_OPERATOR_ADDRESS = SERVER_ADDRESS + "/api/v1/operators";
 export const POST_OPERATOR_ADDRESS = SERVER_ADDRESS + "/api/v1/operators";

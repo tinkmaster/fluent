@@ -33,54 +33,53 @@ export function getExecutionDiagram(pipelineName, name) {
     return dispatch => {
         get(GET_EXECUTION_ADDRESS
             .replace('{0}', pipelineName)
-            .replace('{1}', name))
-            .then(
-                response => {
-                    if (response.data.code === 200) {
-                        dispatch(getExecutionDiagramListAction(response.data.data));
-                        let res = []
-                        const nodes = response.data.data.nodes
-                        const ids = Object.keys(nodes);
-                        for (let i = 0; i < ids.length; i++) {
-                            let obj = {}
-                            Object.assign(obj, {
-                                id: ids[i],
-                                data: {
-                                    label: ids[i] + '-' + nodes[ids[i]].operator.name,
-                                    name: nodes[ids[i]].operator.name,
-                                    usedTime: nodes[ids[i]].usedTime
-                                },
-                                position: {x: 200 + 100 * i, y: 70 * i}
-                            })
-                            if (nodes[ids[i]].status === 'RUNNING') {
-                                obj['type'] = 'runningNode'
-                            } else if (nodes[ids[i]].status === 'FAILED') {
-                                obj['type'] = 'errorNode'
-                            } else if (nodes[ids[i]].status === 'FINISHED') {
-                                obj['type'] = 'finishedNode'
-                            } else {
-                                obj['type'] = 'todoNode'
-                            }
-                            res.push(obj)
-                            for (let j = 0; j < nodes[ids[i]].next.length; j++) {
-                                res.push(
-                                    {
-                                        id: ids[i] + '->' + nodes[ids[i]].next[j],
-                                        source: ids[i],
-                                        target: nodes[ids[i]].next[j],
-                                        sourceHandler: null,
-                                        targetHandler: null,
-                                        arrowHeadType: 'arrowclosed',
-                                        type: 'custom'
-                                    }
-                                )
-                            }
+            .replace('{1}', name)).then(
+            response => {
+                if (response.data.code === 200) {
+                    dispatch(getExecutionDiagramListAction(response.data.data));
+                    let res = []
+                    const nodes = response.data.data.nodes
+                    const ids = Object.keys(nodes);
+                    for (let i = 0; i < ids.length; i++) {
+                        let obj = {}
+                        Object.assign(obj, {
+                            id: ids[i],
+                            data: {
+                                label: ids[i] + '-' + nodes[ids[i]].operator.name,
+                                name: nodes[ids[i]].operator.name,
+                                usedTime: nodes[ids[i]].usedTime
+                            },
+                            position: {x: 200 + 100 * i, y: 70 * i}
+                        })
+                        if (nodes[ids[i]].status === 'RUNNING') {
+                            obj['type'] = 'runningNode'
+                        } else if (nodes[ids[i]].status === 'FAILED') {
+                            obj['type'] = 'errorNode'
+                        } else if (nodes[ids[i]].status === 'FINISHED') {
+                            obj['type'] = 'finishedNode'
+                        } else {
+                            obj['type'] = 'todoNode'
                         }
-                        console.log(res)
-                        dispatch(updatePipelinePageState(['executionData', res]))
+                        res.push(obj)
+                        for (let j = 0; j < nodes[ids[i]].next.length; j++) {
+                            res.push(
+                                {
+                                    id: ids[i] + '->' + nodes[ids[i]].next[j],
+                                    source: ids[i],
+                                    target: nodes[ids[i]].next[j],
+                                    sourceHandler: null,
+                                    targetHandler: null,
+                                    arrowHeadType: 'arrowclosed',
+                                    type: 'custom'
+                                }
+                            )
+                        }
                     }
+                    console.log(res)
+                    dispatch(updatePipelinePageState(['executionData', res]))
                 }
-            )
+            }
+        )
     }
 }
 

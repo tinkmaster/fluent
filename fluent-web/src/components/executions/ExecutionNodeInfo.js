@@ -12,8 +12,8 @@ export class ExecutionNodeInfo extends React.Component {
     render() {
 
         let nodeResult;
-        if (this.props.diagram.result[this.props.node.id]) {
-            nodeResult = JSON.parse(this.props.diagram.result[this.props.node.id]);
+        if (this.props.diagram.results[this.props.node.id]) {
+            nodeResult = JSON.parse(this.props.diagram.results[this.props.node.id]);
         }
         return (
             <div className={'execution-node-info'}>
@@ -34,7 +34,6 @@ export class ExecutionNodeInfo extends React.Component {
                                     style={{fontWeight: 'bold'}}>{nodeResult.error}</span></Descriptions.Item>
                             </Descriptions> : ''
                     }
-
                     {
                         this.props.node.operator.type === 'HTTP_REQUEST' ?
                             <div>

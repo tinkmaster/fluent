@@ -1,12 +1,13 @@
 package tech.tinkmaster.fluent.api.server.resources.v1.operator;
 
-import java.io.IOException;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
-import tech.tinkmaster.fluent.api.server.exceptions.FluentNotFoundException;
 import tech.tinkmaster.fluent.api.server.responses.ResponseEntity;
 import tech.tinkmaster.fluent.common.entity.operator.Operator;
+import tech.tinkmaster.fluent.common.exceptions.FluentNotFoundException;
 import tech.tinkmaster.fluent.service.operator.OperatorService;
+
+import java.io.IOException;
 
 @RestController
 @RequestMapping("/api/v1/operators")

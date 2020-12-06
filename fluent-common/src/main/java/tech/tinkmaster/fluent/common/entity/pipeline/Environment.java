@@ -14,15 +14,15 @@ public class Environment {
   String host;
   int port;
   boolean isHttps;
-  Map<String, String> replacements;
+  Map<String, String> parameters;
 
   public Environment deepClone() {
     return Environment.builder()
-        .name(name)
-        .host(host)
-        .port(port)
-        .isHttps(isHttps)
-        .replacements(new HashMap<>(replacements))
+        .name(this.name)
+        .host(this.host)
+        .port(this.port)
+        .isHttps(this.isHttps)
+        .parameters(new HashMap<>(this.parameters))
         .build();
   }
 }

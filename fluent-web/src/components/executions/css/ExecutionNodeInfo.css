@@ -5,6 +5,7 @@
     border-left: 1px solid #f0f0f0;
     width: 100%;
     overflow: auto;
+    background-color: white;
 }
 
 .execution-node-info-card-title {
@@ -16,7 +17,6 @@
 .execution-node-info .ant-card-head {
     padding: 12px 18px;
     min-height: 0;
-    background-color: white;
     width: 100%;
 }
 

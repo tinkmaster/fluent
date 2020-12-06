@@ -64,7 +64,7 @@ export const finishedNode = memo(({data}) => {
                 position="left"
             />
             <div>
-                <Row>
+                <Row style={{testAlign: 'center'}}>
                     {getNodeLabel(data.label)}
                 </Row>
                 <Row>

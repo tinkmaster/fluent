@@ -1,4 +1,4 @@
-import {deleteRequest, get, post} from "../fetch/Fetch";
+import {deleteRequest, errorHandler, get, post} from "../fetch/Fetch";
 import {
     DELETE_PIPELINE_ADDRESS,
     GET_PIPELINE_ADDRESS,
@@ -12,14 +12,16 @@ import {
     freshPipelineListAction,
     updatePipelineGraph
 } from "../pages/pipelines/PipelinesPageReducer";
+import React from "react";
 
 export function listPipelines() {
     return dispatch => {
         get(LIST_PIPELINE_ADDRESS).then(response => {
-            if (response.data.code === 200) {
-                dispatch(freshPipelineListAction(response.data.data))
+                if (response.data.code === 200) {
+                    dispatch(freshPipelineListAction(response.data.data))
+                }
             }
-        })
+        )
     }
 }
 
@@ -81,9 +83,10 @@ export function postPipeline(value) {
             response => {
                 if (response.data.code === 200) {
                     dispatch(listPipelines())
+                    message.success('Save pipeline successfully.');
                 }
             }
-        )
+        ).catch(error => errorHandler(error))
     }
 }
 
@@ -92,10 +95,10 @@ export function updatePipeline(name, values) {
         post(POST_PIPELINE_ADDRESS, values).then(
             response => {
                 if (response.data.code === 200) {
-                    message.success("Update successfully.")
+                    message.success("Update pipeline successfully.")
                 }
             }
-        )
+        ).catch(error => errorHandler(error))
     }
 }
 

@@ -1,14 +1,16 @@
 package tech.tinkmaster.fluent.service.execution;
 
-import java.io.IOException;
-import java.text.ParseException;
-import java.text.SimpleDateFormat;
-import java.util.List;
-import java.util.stream.Collectors;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import tech.tinkmaster.fluent.common.entity.execution.ExecutionDiagram;
 import tech.tinkmaster.fluent.persistence.file.ExecutionStorage;
+
+import java.io.IOException;
+import java.text.ParseException;
+import java.text.SimpleDateFormat;
+import java.util.Collections;
+import java.util.List;
+import java.util.stream.Collectors;
 
 @Service
 public class ExecutionService {
@@ -17,8 +19,10 @@ public class ExecutionService {
 
   public List<ExecutionDiagram> list(String pipelineName) throws IOException {
     List<String> records = this.storage.list(pipelineName);
-    return records
-        .stream()
+    if (records.size() == 0) {
+      return Collections.emptyList();
+    }
+    return records.stream()
         .map(
             name -> {
               String[] arr = name.split("-");
@@ -29,7 +33,7 @@ public class ExecutionService {
                 res.status = diagram.status;
                 return res;
               } catch (ParseException | IOException e) {
-                throw new RuntimeException("Failed to list execution diagram in service.");
+                throw new RuntimeException("Failed to list execution diagram in service.", e);
               }
             })
         .sorted((dia1, dia2) -> dia2.createdTime.compareTo(dia1.createdTime))
