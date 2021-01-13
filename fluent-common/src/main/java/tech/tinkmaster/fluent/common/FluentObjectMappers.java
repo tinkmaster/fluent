@@ -46,7 +46,7 @@ public class FluentObjectMappers {
     mapper.registerModule(new JavaTimeModule()); // To support Instant
     mapper.registerModule(new Jdk8Module()); // To support Optional
 
-    mapper.configure(SerializationFeature.INDENT_OUTPUT, true);
+    mapper.configure(SerializationFeature.INDENT_OUTPUT, false);
     mapper.configure(SerializationFeature.WRITE_DATES_AS_TIMESTAMPS, false);
     mapper.configure(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES, true);
     mapper.configure(DeserializationFeature.READ_UNKNOWN_ENUM_VALUES_USING_DEFAULT_VALUE, false);

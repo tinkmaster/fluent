@@ -165,7 +165,7 @@ export class PipelinesPage extends React.Component {
                     </div>
                     <div style={{
                         display: 'flex', displayDirection: 'row',
-                        height: "40%", paddingTop: 16, width: '100%'
+                        height: "calc(40% - 44px)", paddingTop: 16, width: '100%'
                     }}>
                         <div style={{width: '25%'}}>
                             <ExecutionHistoryList

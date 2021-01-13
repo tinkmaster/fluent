@@ -26,7 +26,7 @@ function drawNextNodes(data, parentId, id, pathLength, branchesNum, res, nodesHa
                 name: node.operator.name,
                 usedTime: node.usedTime
             },
-            position: {x: 250 * pathLength, y: 80 * (branchesNum['num'] - 0.5)}
+            position: {x: 250 * pathLength, y: 80 + 80 * (branchesNum['num'] - 0.5)}
         })
         if (node.status === 'RUNNING') {
             obj['type'] = 'runningNode'
@@ -59,7 +59,7 @@ function drawNextNodes(data, parentId, id, pathLength, branchesNum, res, nodesHa
         let connectionExisted = false
         for (let i = 0; i < res.length; i++) {
             if (res[i].id === id) {
-                res[i].position = {x: 250 * pathLength, y: 80 * (branchesNum['num'] - 1)}
+                res[i].position = {x: 250 * pathLength, y: 80 + 80 * (branchesNum['num'] - 1)}
             }
             if (res[i].id === parentId + '->' + id) {
                 connectionExisted = true

@@ -11,15 +11,15 @@ import java.util.*;
 @Getter
 @Setter
 public class ExecutionDiagram {
-  public String name;
-  public String pipelineName;
-  public String pipelineGroupName;
-  public List<Integer> sources;
-  public Map<Integer, ExecutionDiagramNode> nodes;
-  public Integer currentNode;
-  public ExecutionStatus status;
-  public Date createdTime;
-  public Map<String, String> results;
+  private String name;
+  private String pipelineName;
+  private String pipelineGroupName;
+  private List<Integer> sources;
+  private Map<Integer, ExecutionDiagramNode> nodes;
+  private Integer currentNode;
+  private ExecutionStatus status;
+  private Date createdTime;
+  private Map<String, String> results;
 
   public ExecutionDiagram() {
     this.results = new HashMap<>();
@@ -51,8 +51,8 @@ public class ExecutionDiagram {
     List<Integer> sources = new LinkedList<>();
     nodes.forEach(
         (k, v) -> {
-          if (v.upstreamNodes.size() == 0) {
-            sources.add(v.id);
+          if (v.getUpstreamNodes().size() == 0) {
+            sources.add(v.getId());
           }
         });
 
@@ -69,27 +69,27 @@ public class ExecutionDiagram {
     HashMap<Integer, Boolean> nodesHaveBeenExecuted = new HashMap<>();
     this.nodes.forEach(
         (id, node) -> {
-          if (node.status == ExecutionStatus.FINISHED) {
+          if (node.getStatus() == ExecutionStatus.FINISHED) {
             nodesHaveBeenExecuted.put(id, Boolean.TRUE);
           }
         });
     ExecutionDiagramNode res = new ExecutionDiagramNode();
-    res.id = null;
+    res.setId(null);
     this.nodes.forEach(
         (id, node) -> {
-          if (node.status == ExecutionStatus.RUNNING
-              || node.status == ExecutionStatus.CREATED
-              || node.status == ExecutionStatus.WAITING_TO_BE_SCHEDULED) {
-            if (node.upstreamNodes.size() == 0
-                || node.upstreamNodes.stream()
+          if (node.getStatus() == ExecutionStatus.RUNNING
+              || node.getStatus() == ExecutionStatus.CREATED
+              || node.getStatus() == ExecutionStatus.WAITING_TO_BE_SCHEDULED) {
+            if (node.getUpstreamNodes().size() == 0
+                || node.getUpstreamNodes().stream()
                     .allMatch(
                         upstreamNodeId -> nodesHaveBeenExecuted.get(upstreamNodeId) != null)) {
-              res.id = id;
+              res.setId(id);
             }
           }
         });
 
-    return res.id;
+    return res.getId();
   }
 
   public boolean checkIfHasCircle() {
@@ -110,15 +110,15 @@ public class ExecutionDiagram {
       ExecutionDiagramNode node,
       Map<Integer, Boolean> nodesHaveBeenReviewed,
       Map<Integer, Boolean> nodesForDetection) {
-    if (nodesForDetection.get(node.id) != null) {
+    if (nodesForDetection.get(node.getId()) != null) {
       return true;
     } else {
-      nodesForDetection.put(node.id, Boolean.TRUE);
-      nodesHaveBeenReviewed.put(node.id, Boolean.TRUE);
+      nodesForDetection.put(node.getId(), Boolean.TRUE);
+      nodesHaveBeenReviewed.put(node.getId(), Boolean.TRUE);
     }
-    for (int i = 0; i < node.next.size(); i++) {
+    for (int i = 0; i < node.getNext().size(); i++) {
       Map<Integer, Boolean> nodes = new HashMap<>(nodesForDetection);
-      if (this.detectCircle(this.nodes.get(node.next.get(i)), nodesHaveBeenReviewed, nodes)) {
+      if (this.detectCircle(this.nodes.get(node.getNext().get(i)), nodesHaveBeenReviewed, nodes)) {
         return true;
       }
     }
@@ -136,21 +136,17 @@ public class ExecutionDiagram {
     if (id == null) {
       return null;
     }
-    return this.nodes.get(id).status;
+    return this.nodes.get(id).getStatus();
   }
 
   private List<Integer> getNodeNext(Integer id) {
     if (id == null) {
       return Collections.emptyList();
     }
-    return this.nodes.get(id).next;
-  }
-
-  private void setCurrentNode(Integer id) {
-    this.currentNode = id;
+    return this.nodes.get(id).getNext();
   }
 
   private void setCurrentNodeStatus(ExecutionStatus status) {
-    this.getNode(this.currentNode).status = status;
+    this.getNode(this.currentNode).setStatus(status);
   }
 }

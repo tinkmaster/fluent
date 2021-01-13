@@ -1,18 +1,22 @@
 package tech.tinkmaster.fluent.common.entity.execution;
 
+import lombok.Getter;
+import lombok.Setter;
 import tech.tinkmaster.fluent.common.entity.operator.Operator;
 
 import java.util.*;
 
+@Getter
+@Setter
 public class ExecutionDiagramNode {
-  public Integer id;
-  public List<Integer> upstreamNodes;
-  public List<Integer> next;
-  public Operator operator;
-  public Map<String, String> executionResult;
-  public Date executionTime;
-  public ExecutionStatus status;
-  public Long usedTime;
+  private Integer id;
+  private List<Integer> upstreamNodes;
+  private List<Integer> next;
+  private Operator operator;
+  private Map<String, String> executionResult;
+  private Date executionTime;
+  private ExecutionStatus status;
+  private Long usedTime;
 
   public ExecutionDiagramNode() {}
 
@@ -33,9 +37,5 @@ public class ExecutionDiagramNode {
   public ExecutionDiagramNode addUpper(ExecutionDiagramNode node) {
     this.upstreamNodes.add(node.id);
     return this;
-  }
-
-  public void setExecutionTime(Date executionTime) {
-    this.executionTime = executionTime;
   }
 }

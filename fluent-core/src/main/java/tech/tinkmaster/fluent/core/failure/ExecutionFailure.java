@@ -1,9 +1,10 @@
 package tech.tinkmaster.fluent.core.failure;
 
-import java.util.Date;
 import lombok.Builder;
 import lombok.Value;
 import lombok.With;
+
+import java.util.Date;
 
 @Value
 @With
@@ -12,4 +13,5 @@ public class ExecutionFailure extends RuntimeException {
   String message;
   String reason;
   Date failedAt;
+  Object result;
 }

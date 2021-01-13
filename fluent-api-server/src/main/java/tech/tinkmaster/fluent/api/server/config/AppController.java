@@ -11,7 +11,6 @@ public class AppController {
 
   @RequestMapping("/")
   public RedirectView home() {
-    System.out.println("aaaaaaaa");
     return this.rv;
   }
 

@@ -1,7 +1,28 @@
 import React from 'react';
-import {Card, Descriptions, Empty, Popover} from "antd";
-import ReadOutlined from "@ant-design/icons/lib/icons/ReadOutlined";
+import {Card, Descriptions, Empty, Popover, Table} from "antd";
+import {ReadOutlined, CheckOutlined, CloseOutlined} from "@ant-design/icons/lib/icons";
 import './css/ExecutionNodeInfo.css'
+
+const dataValidationColoums = [
+    {
+      title: 'Variable',
+      dataIndex: 'variable',
+      key: 'variable',
+    },
+    {
+      title: 'Status',
+      dataIndex: 'status',
+      key: 'status',
+      render: status => {
+        return status === "true" ? <CheckOutlined style={{color: 'green'}}/>: <CloseOutlined style={{color: 'red'}}/>;
+      }
+    },
+    {
+      title: 'Result',
+      dataIndex: 'result',
+      key: 'result',
+    }
+]
 
 export class ExecutionNodeInfo extends React.Component {
 
@@ -10,10 +31,34 @@ export class ExecutionNodeInfo extends React.Component {
     }
 
     render() {
-
         let nodeResult;
+        let dataValidationData = [];
         if (this.props.diagram.results[this.props.node.id]) {
             nodeResult = JSON.parse(this.props.diagram.results[this.props.node.id]);
+            if (this.props.node.operator.type === 'DATA_VALIDATION') {
+                if (this.props.node.status === 'FINISHED') {
+                    Object.keys(nodeResult).map(variable => {
+                        dataValidationData = dataValidationData.concat(
+                            {
+                                variable: variable,
+                                status: nodeResult[variable]['result'],
+                                result: nodeResult[variable]['message']
+                            }
+                        )
+                    })
+                } else if(nodeResult['data']){
+                    Object.keys(nodeResult['data']).map(variable => {
+                        dataValidationData = dataValidationData.concat(
+                            {
+                                variable: variable,
+                                status: nodeResult['data'][variable]['result'],
+                                result: nodeResult['data'][variable]['message']
+                            }
+                        )
+                    })
+                }
+            }
+            console.log(dataValidationData)
         }
         return (
             <div className={'execution-node-info'}>
@@ -89,9 +134,11 @@ export class ExecutionNodeInfo extends React.Component {
                                 </Descriptions>
                             </div>
                             : ''}
+                    {
+                        this.props.node.operator.type === 'DATA_VALIDATION' ?
+                            <Table columns={dataValidationColoums} dataSource={dataValidationData} />
+                            : ''}
                 </Card>
-
-
             </div>
         )
     }

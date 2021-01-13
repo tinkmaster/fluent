@@ -30,13 +30,13 @@ public class ExecutionService {
               try {
                 ExecutionDiagram diagram = this.storage.get(pipelineName, name);
                 ExecutionDiagram res = new ExecutionDiagram(name, arr[1], dateStr.parse(arr[1]));
-                res.status = diagram.status;
+                res.setStatus(diagram.getStatus());
                 return res;
               } catch (ParseException | IOException e) {
                 throw new RuntimeException("Failed to list execution diagram in service.", e);
               }
             })
-        .sorted((dia1, dia2) -> dia2.createdTime.compareTo(dia1.createdTime))
+        .sorted((dia1, dia2) -> dia2.getCreatedTime().compareTo(dia1.getCreatedTime()))
         .collect(Collectors.toList());
   }
 

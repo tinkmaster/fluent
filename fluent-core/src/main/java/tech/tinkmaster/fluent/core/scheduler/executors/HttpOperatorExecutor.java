@@ -2,6 +2,7 @@ package tech.tinkmaster.fluent.core.scheduler.executors;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import tech.tinkmaster.fluent.common.entity.execution.ExecutionDiagram;
 import tech.tinkmaster.fluent.common.entity.operator.Operator;
 import tech.tinkmaster.fluent.common.util.http.http.FluentHttpMethod;
 import tech.tinkmaster.fluent.common.util.http.http.FluentHttpPortal;
@@ -17,12 +18,14 @@ import java.util.Map;
 
 public class HttpOperatorExecutor implements OperatorExecutor {
   private static final Logger LOG = LoggerFactory.getLogger(HttpOperatorExecutor.class);
-  Operator operator;
+  private Operator operator;
+  private ExecutionDiagram diagram;
 
-  FluentHttpRequest request;
+  private FluentHttpRequest request;
 
-  public HttpOperatorExecutor(Operator operator) {
+  public HttpOperatorExecutor(ExecutionDiagram diagram, Operator operator) {
     this.operator = operator;
+    this.diagram = diagram;
 
     Map<String, String> parameters = operator.getParams();
     Map<String, String> headers = new HashMap<>();
@@ -56,10 +59,8 @@ public class HttpOperatorExecutor implements OperatorExecutor {
 
   @Override
   public Object execute() throws IOException {
-    LOG.info("Start to executor operator {}", this.operator.getName());
     try {
       FluentHttpResponse response = FluentHttpPortal.sendRequest(this.request);
-      LOG.info("Finish executing operator {}", this.operator.getName());
       return response;
     } catch (IOException e) {
       // collect error information
