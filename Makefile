@@ -26,7 +26,7 @@ test:
 build-and-publish-docker: google-java-format docker docker-login docker-publish-master
 
 .PHONY: build-and-publish-maven-cache-docker
-build-and-publish-maven-cache-docker:
+build-and-publish-maven-cache-docker: docker-login
 	@make _helper_build_maven_cache_dockerimage
 	@make _helper_push_maven_cache_dockerimage
 
@@ -51,7 +51,7 @@ docker-publish-release:
 	@make _helper_push_dockerimage TARGET_IMAGE="$(REGISTRY)/$(IMAGE_REPOSITORY):$(VERSION)"
 
 .PHONY: format
-format: google-java-format xml-format
+format: google-java-format
 
 .PHONY: google-java-format
 google-java-format: tools/google-java-format.jar
@@ -106,8 +106,8 @@ _helper_build_maven_cache_dockerimage:
 	  --label tech.tinkmaster.fluent.version="$(VERSION)" \
 	  --label tech.tinkmaster.fluent.created="$(TIMESTAMP)" \
 	  --label tech.tinkmaster.fluent.revision="$(GIT_REVISION)" .
-	docker tag $$(cat .imageid_maven_cache) $(MAVEN_CACHE_IMAGE_REPOSITORY)
+	docker tag $$(cat .imageid_maven_cache) $(MAVEN_CACHE_IMAGE_REPOSITORY):$(VERSION)
 
 .PHONY: _helper_push_maven_cache_dockerimage
 _helper_push_maven_cache_dockerimage:
-	docker push $(MAVEN_CACHE_IMAGE_REPOSITORY)
+	docker push $(MAVEN_CACHE_IMAGE_REPOSITORY):$(VERSION)

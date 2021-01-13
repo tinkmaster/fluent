@@ -1,4 +1,4 @@
-FROM maven:3.5.3-jdk-8 AS initial-maven-base
+FROM maven:3.6.3-jdk-11 AS initial-maven-base
 LABEL tech.tinkmaster.title="tink-master-fluent-stage-initial-maven-base"
 LABEL tech.tinkmaster.description="Initial maven-base stage of Fluent® multi-stage docker build"
 RUN apt-get update \
