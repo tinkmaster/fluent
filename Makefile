@@ -108,6 +108,10 @@ _helper_build_maven_cache_dockerimage:
 	  --label tech.tinkmaster.fluent.revision="$(GIT_REVISION)" .
 	docker tag $$(cat .imageid_maven_cache) $(MAVEN_CACHE_IMAGE_REPOSITORY):$(VERSION)
 
+.PHONY: _helper_push_dockerimage
+_helper_push_dockerimage:
+	docker push $(TARGET_IMAGE)
+
 .PHONY: _helper_push_maven_cache_dockerimage
 _helper_push_maven_cache_dockerimage:
 	docker push $(MAVEN_CACHE_IMAGE_REPOSITORY):$(VERSION)
