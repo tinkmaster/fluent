@@ -1,0 +1,21 @@
+name: Docker Image CI
+
+on: pull_request
+env:
+  DOCKER_REGISTRY_USERNAME: ${{ secrets.DOCKER_HUB_ACCOUNT_NAME }}
+  DOCKER_REGISTRY_PASSWORD: ${{ secrets.DOCKER_HUB_ACCOUNT_PASSWORD }}
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: install tools
+        run: sudo apt-get install libxml2-utils
+      - uses: actions/checkout@v2
+      - name: google-java-format
+        run: make format
+      - name: Build the Maven Cached Docker image
+        run: make build-and-publish-maven-cache-docker
+      - name: Build fluent docker image
+        run: make docker

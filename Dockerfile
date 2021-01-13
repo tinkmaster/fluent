@@ -1,7 +1,7 @@
 FROM maven:3.5.3-jdk-8 AS initial-maven-base
 
 # Build the fluent-web module ahead and individually to cache the layer
-FROM tinkericlee/maven-cache-fluent AS fluent-web-build
+FROM tinkericlee/maven-cache-fluent:1.0.0 AS fluent-web-build
 LABEL tech.tinkmaster.title="fluent-web-build"
 LABEL tech.tinkmaster.description="Fluent-web build stage of ToolBox multi-stage docker build"
 WORKDIR /usr/src/fluent-maven
