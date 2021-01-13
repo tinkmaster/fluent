@@ -1,5 +1,10 @@
 package tech.tinkmaster.fluent.service.pipeline;
 
+import java.io.IOException;
+import java.util.HashMap;
+import java.util.LinkedList;
+import java.util.List;
+import java.util.Map;
 import org.apache.commons.lang3.tuple.Pair;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -8,12 +13,6 @@ import tech.tinkmaster.fluent.common.entity.operator.Operator;
 import tech.tinkmaster.fluent.common.entity.pipeline.Pipeline;
 import tech.tinkmaster.fluent.common.exceptions.FluentPipelineCircleDetectedException;
 import tech.tinkmaster.fluent.persistence.file.PipelineStorage;
-
-import java.io.IOException;
-import java.util.HashMap;
-import java.util.LinkedList;
-import java.util.List;
-import java.util.Map;
 
 @Service
 public class PipelineService {

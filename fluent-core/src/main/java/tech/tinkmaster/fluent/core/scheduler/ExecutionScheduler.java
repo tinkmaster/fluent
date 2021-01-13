@@ -1,6 +1,9 @@
 package tech.tinkmaster.fluent.core.scheduler;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
+import java.io.IOException;
+import java.util.HashMap;
+import java.util.Map;
 import lombok.Getter;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -13,10 +16,6 @@ import tech.tinkmaster.fluent.core.PipelineSchedulerService;
 import tech.tinkmaster.fluent.core.failure.ExecutionFailure;
 import tech.tinkmaster.fluent.core.scheduler.executors.OperatorExecutionFetcher;
 import tech.tinkmaster.fluent.core.scheduler.executors.OperatorExecutor;
-
-import java.io.IOException;
-import java.util.HashMap;
-import java.util.Map;
 
 @Getter
 public class ExecutionScheduler extends Thread {

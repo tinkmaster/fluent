@@ -2,15 +2,14 @@ package tech.tinkmaster.fluent.core;
 
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
-import tech.tinkmaster.fluent.common.FluentObjectMappers;
-import tech.tinkmaster.fluent.common.entity.execution.ExecutionDiagram;
-import tech.tinkmaster.fluent.common.entity.operator.Operator;
-import tech.tinkmaster.fluent.core.failure.ExecutionFailuresFactory;
-
 import java.io.IOException;
 import java.util.Arrays;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
+import tech.tinkmaster.fluent.common.FluentObjectMappers;
+import tech.tinkmaster.fluent.common.entity.execution.ExecutionDiagram;
+import tech.tinkmaster.fluent.common.entity.operator.Operator;
+import tech.tinkmaster.fluent.core.failure.ExecutionFailuresFactory;
 
 /** This class is used for resolving the variables in the operators parameters */
 public class VariablesResolver {

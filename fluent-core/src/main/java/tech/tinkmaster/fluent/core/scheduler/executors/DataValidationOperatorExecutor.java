@@ -1,16 +1,15 @@
 package tech.tinkmaster.fluent.core.scheduler.executors;
 
-import tech.tinkmaster.fluent.common.entity.execution.ExecutionDiagram;
-import tech.tinkmaster.fluent.common.entity.operator.Operator;
-import tech.tinkmaster.fluent.core.VariablesResolver;
-import tech.tinkmaster.fluent.core.failure.ExecutionFailure;
-import tech.tinkmaster.fluent.core.failure.ExecutionFailuresFactory;
-
 import java.io.IOException;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
+import tech.tinkmaster.fluent.common.entity.execution.ExecutionDiagram;
+import tech.tinkmaster.fluent.common.entity.operator.Operator;
+import tech.tinkmaster.fluent.core.VariablesResolver;
+import tech.tinkmaster.fluent.core.failure.ExecutionFailure;
+import tech.tinkmaster.fluent.core.failure.ExecutionFailuresFactory;
 
 /**
  * This class is used for checking if the data is as expected.

@@ -1,12 +1,11 @@
 package tech.tinkmaster.fluent.common.entity.execution;
 
+import java.text.SimpleDateFormat;
+import java.util.*;
 import lombok.Getter;
 import lombok.Setter;
 import org.apache.commons.lang3.tuple.Pair;
 import tech.tinkmaster.fluent.common.entity.operator.Operator;
-
-import java.text.SimpleDateFormat;
-import java.util.*;
 
 @Getter
 @Setter
@@ -81,7 +80,8 @@ public class ExecutionDiagram {
               || node.getStatus() == ExecutionStatus.CREATED
               || node.getStatus() == ExecutionStatus.WAITING_TO_BE_SCHEDULED) {
             if (node.getUpstreamNodes().size() == 0
-                || node.getUpstreamNodes().stream()
+                || node.getUpstreamNodes()
+                    .stream()
                     .allMatch(
                         upstreamNodeId -> nodesHaveBeenExecuted.get(upstreamNodeId) != null)) {
               res.setId(id);

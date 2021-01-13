@@ -1,10 +1,9 @@
 package tech.tinkmaster.fluent.core.failure;
 
+import java.util.Date;
 import lombok.Builder;
 import lombok.Value;
 import lombok.With;
-
-import java.util.Date;
 
 @Value
 @With
