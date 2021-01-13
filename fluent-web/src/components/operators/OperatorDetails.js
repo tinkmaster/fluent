@@ -182,14 +182,16 @@ class DataValidation extends Component {
 
     render() {
         let dvInitialValue=[]
-        Object.keys(this.props.params).map(key => {
-            dvInitialValue = dvInitialValue.concat(
-                {
-                    variable: key,
-                    condition: this.props.params[key]
-                }
-            )
-        })
+        if (this.props.params) {
+            Object.keys(this.props.params).map(key => {
+                dvInitialValue = dvInitialValue.concat(
+                    {
+                        variable: key,
+                        condition: this.props.params[key]
+                    }
+                )
+            })
+        }
         return (
             <Form.List name="conditions" initialValue={dvInitialValue}>
                 {(fields, { add, remove }) => (
