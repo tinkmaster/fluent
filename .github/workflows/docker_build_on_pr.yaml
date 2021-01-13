@@ -15,5 +15,8 @@ jobs:
       - uses: actions/checkout@v2
       - name: google-java-format
         run: make format
+
+      - name: Build the Maven Cached Docker image
+        run: make build-and-publish-maven-cache-docker
       - name: Build fluent docker image
         run: make docker
