@@ -1,16 +1,15 @@
 package tech.tinkmaster.fluent.service.execution;
 
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.stereotype.Service;
-import tech.tinkmaster.fluent.common.entity.execution.ExecutionDiagram;
-import tech.tinkmaster.fluent.persistence.file.ExecutionStorage;
-
 import java.io.IOException;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.Collections;
 import java.util.List;
 import java.util.stream.Collectors;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Service;
+import tech.tinkmaster.fluent.common.entity.execution.ExecutionDiagram;
+import tech.tinkmaster.fluent.persistence.file.ExecutionStorage;
 
 @Service
 public class ExecutionService {
@@ -22,7 +21,8 @@ public class ExecutionService {
     if (records.size() == 0) {
       return Collections.emptyList();
     }
-    return records.stream()
+    return records
+        .stream()
         .map(
             name -> {
               String[] arr = name.split("-");

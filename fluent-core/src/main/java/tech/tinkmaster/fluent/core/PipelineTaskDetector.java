@@ -1,5 +1,7 @@
 package tech.tinkmaster.fluent.core;
 
+import java.io.IOException;
+import java.util.List;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -9,9 +11,6 @@ import tech.tinkmaster.fluent.common.entity.execution.ExecutionDiagram;
 import tech.tinkmaster.fluent.common.entity.execution.ExecutionStatus;
 import tech.tinkmaster.fluent.service.execution.ExecutionService;
 import tech.tinkmaster.fluent.service.pipeline.PipelineService;
-
-import java.io.IOException;
-import java.util.List;
 
 @Component
 public class PipelineTaskDetector {
@@ -24,12 +23,14 @@ public class PipelineTaskDetector {
   public void detectExecutionDiagram() {
     List<String> pipelines = this.pipelineService.list();
 
-    pipelines.stream()
+    pipelines
+        .stream()
         .forEach(
             pipeline -> {
               try {
                 List<ExecutionDiagram> diagrams = this.service.list(pipeline);
-                diagrams.stream()
+                diagrams
+                    .stream()
                     .forEach(
                         dia -> {
                           try {

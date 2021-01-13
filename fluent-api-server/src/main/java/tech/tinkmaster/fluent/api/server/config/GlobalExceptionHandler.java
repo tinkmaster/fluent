@@ -1,5 +1,6 @@
 package tech.tinkmaster.fluent.api.server.config;
 
+import javax.servlet.http.HttpServletResponse;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.web.bind.annotation.ControllerAdvice;
@@ -8,8 +9,6 @@ import org.springframework.web.bind.annotation.ResponseBody;
 import tech.tinkmaster.fluent.api.server.responses.ResponseEntity;
 import tech.tinkmaster.fluent.common.exceptions.FluentNotFoundException;
 import tech.tinkmaster.fluent.common.exceptions.FluentPipelineCircleDetectedException;
-
-import javax.servlet.http.HttpServletResponse;
 
 @ControllerAdvice
 public class GlobalExceptionHandler {

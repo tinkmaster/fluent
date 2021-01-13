@@ -1,10 +1,9 @@
 package tech.tinkmaster.fluent.common.entity.execution;
 
+import java.util.*;
 import lombok.Getter;
 import lombok.Setter;
 import tech.tinkmaster.fluent.common.entity.operator.Operator;
-
-import java.util.*;
 
 @Getter
 @Setter

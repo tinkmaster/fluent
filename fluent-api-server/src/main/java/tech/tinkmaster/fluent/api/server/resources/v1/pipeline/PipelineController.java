@@ -1,13 +1,12 @@
 package tech.tinkmaster.fluent.api.server.resources.v1.pipeline;
 
+import java.io.IOException;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
 import tech.tinkmaster.fluent.api.server.responses.ResponseEntity;
 import tech.tinkmaster.fluent.common.entity.pipeline.Pipeline;
 import tech.tinkmaster.fluent.common.exceptions.FluentNotFoundException;
 import tech.tinkmaster.fluent.service.pipeline.PipelineService;
-
-import java.io.IOException;
 
 @RestController
 @RequestMapping("/api/v1/pipelines")
