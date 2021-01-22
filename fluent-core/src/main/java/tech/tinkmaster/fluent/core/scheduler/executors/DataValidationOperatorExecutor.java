@@ -3,13 +3,11 @@ package tech.tinkmaster.fluent.core.scheduler.executors;
 import java.io.IOException;
 import java.util.HashMap;
 import java.util.Map;
-import java.util.regex.Matcher;
-import java.util.regex.Pattern;
 import tech.tinkmaster.fluent.common.entity.execution.ExecutionDiagram;
 import tech.tinkmaster.fluent.common.entity.operator.Operator;
-import tech.tinkmaster.fluent.core.VariablesResolver;
 import tech.tinkmaster.fluent.core.failure.ExecutionFailure;
 import tech.tinkmaster.fluent.core.failure.ExecutionFailuresFactory;
+import tech.tinkmaster.fluent.core.variableresolver.VariablesResolver;
 
 /**
  * This class is used for checking if the data is as expected.
@@ -23,9 +21,6 @@ import tech.tinkmaster.fluent.core.failure.ExecutionFailuresFactory;
  */
 public class DataValidationOperatorExecutor implements OperatorExecutor {
   private static VariablesResolver variablesResolver = new VariablesResolver();
-  private static final Pattern EQUALS_PATTERN = Pattern.compile("equals\\(([0-9A-Za-z]+)\\)");
-  private static final Pattern NOT_EQUALS_PATTERN =
-      Pattern.compile("notEquals\\(([0-9A-Za-z]+)\\)");
   private static final String CHECK_RESULT_KEY = "result";
   private static final String CHECK_RESULT_MESSAGE_KEY = "message";
   private static final String EQUAL_RESULT_MESSAGE_TEMPLATE = "var:%s equals with value:%s.";
@@ -47,9 +42,13 @@ public class DataValidationOperatorExecutor implements OperatorExecutor {
         (k, v) -> {
           try {
             String var = variablesResolver.resolve(this.diagram, k);
-            String value = variablesResolver.resolve(this.diagram, v);
 
-            validationResult.put(k, this.check(var, value));
+            // extract function name from value
+            String functionName = v.substring(0, v.indexOf(","));
+            String unresolvedValue = v.substring(v.indexOf(",") + 1);
+            String value = variablesResolver.resolve(this.diagram, unresolvedValue);
+
+            validationResult.put(k, this.check(functionName, var, value));
           } catch (ExecutionFailure e) {
             validationResult.put(
                 k,
@@ -70,34 +69,28 @@ public class DataValidationOperatorExecutor implements OperatorExecutor {
     return validationResult;
   }
 
-  private Map<String, String> check(String key, String value) {
+  private Map<String, String> check(String funcName, String key, String value) {
     Map<String, String> result = new HashMap<>();
 
-    // check if has used the function
-    Matcher equalMatcher = EQUALS_PATTERN.matcher(value);
-    Matcher notEqualMatcher = NOT_EQUALS_PATTERN.matcher(value);
-
-    if (equalMatcher.find()) {
-      String var = equalMatcher.group(0);
-      if (var.equals(value)) {
+    if ("equals".equals(funcName)) {
+      if (key.equals(value)) {
         result.put(CHECK_RESULT_KEY, Boolean.TRUE.toString());
         result.put(
-            CHECK_RESULT_MESSAGE_KEY, String.format(EQUAL_RESULT_MESSAGE_TEMPLATE, var, value));
+            CHECK_RESULT_MESSAGE_KEY, String.format(EQUAL_RESULT_MESSAGE_TEMPLATE, key, value));
       } else {
         result.put(CHECK_RESULT_KEY, Boolean.FALSE.toString());
         result.put(
-            CHECK_RESULT_MESSAGE_KEY, String.format(NOT_EQUAL_RESULT_MESSAGE_TEMPLATE, var, value));
+            CHECK_RESULT_MESSAGE_KEY, String.format(NOT_EQUAL_RESULT_MESSAGE_TEMPLATE, key, value));
       }
-    } else if (notEqualMatcher.find()) {
-      String var = equalMatcher.group(0);
-      if (var.equals(value)) {
+    } else if ("notEquals".equals(funcName)) {
+      if (!key.equals(value)) {
         result.put(CHECK_RESULT_KEY, Boolean.TRUE.toString());
         result.put(
-            CHECK_RESULT_MESSAGE_KEY, String.format(NOT_EQUAL_RESULT_MESSAGE_TEMPLATE, var, value));
+            CHECK_RESULT_MESSAGE_KEY, String.format(NOT_EQUAL_RESULT_MESSAGE_TEMPLATE, key, value));
       } else {
         result.put(CHECK_RESULT_KEY, Boolean.FALSE.toString());
         result.put(
-            CHECK_RESULT_MESSAGE_KEY, String.format(EQUAL_RESULT_MESSAGE_TEMPLATE, var, value));
+            CHECK_RESULT_MESSAGE_KEY, String.format(EQUAL_RESULT_MESSAGE_TEMPLATE, key, value));
       }
     } else {
       if (key.equals(value)) {

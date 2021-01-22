@@ -29,6 +29,8 @@ public class ExecutionScheduler extends Thread {
     this.scheduleId = id;
     this.setName("ExecutionScheduler-" + id);
     this.status = SchedulerStatus.IDLE;
+    this.setUncaughtExceptionHandler(
+        (t, e) -> LOG.error("Uncaught exception found in execution scheduler.", e));
   }
 
   @Override
