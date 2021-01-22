@@ -41,7 +41,7 @@ export class OperatorDetails extends Component {
         })
         if(values['conditions']) {
             values['conditions'].forEach(con => {
-                data['params'][con['variable'].trim()] = con['condition'].trim()
+                data['params'][con['variable'].trim()] = 'equals,' + con['condition'].trim()
             })
         }
         this.props.postOperator(Object.assign({}, data));
@@ -184,13 +184,12 @@ class DataValidation extends Component {
         let dvInitialValue=[]
         if (this.props.params) {
             Object.keys(this.props.params).map(key => {
-                dvInitialValue = dvInitialValue.concat(
-                    {
-                        variable: key,
-                        condition: this.props.params[key]
-                    }
-                )
-            })
+            dvInitialValue = dvInitialValue.concat(
+                {
+                    variable: key,
+                    condition: this.props.params[key].substring(this.props.params[key].indexOf(',') + 1)
+                })
+           })
         }
         return (
             <Form.List name="conditions" initialValue={dvInitialValue}>

@@ -11,6 +11,14 @@ public class ExecutionFailuresFactory {
         .build();
   }
 
+  public static ExecutionFailure unableToTranslateExecutionInfoToJsonNode() {
+    return ExecutionFailure.builder()
+        .failedAt(new Date())
+        .reason("ResolveVariablesFailure")
+        .message("Unable to translate execution information to in the process of variable resolve.")
+        .build();
+  }
+
   public static ExecutionFailure invalidDataException(Object validationResult) {
     return ExecutionFailure.builder()
         .failedAt(new Date())
@@ -31,22 +39,31 @@ public class ExecutionFailuresFactory {
         .build();
   }
 
-  public static ExecutionFailure invalidJsonFormation(Integer operatorId) {
-    return ExecutionFailure.builder()
-        .failedAt(new Date())
-        .reason("DataValidationFailed")
-        .message(
-            String.format(
-                "Data Validation Failed, result from node id: %s is not json formation.",
-                operatorId))
-        .build();
-  }
-
   public static ExecutionFailure unableToGetValueInNodeResult(String key) {
     return ExecutionFailure.builder()
         .failedAt(new Date())
         .reason("DataValidationFailed")
         .message(String.format("Data Validation Failed, unable to fetch value from key:%s", key))
+        .build();
+  }
+
+  /** ------------------------- Exceptions about resolve functions ------------------------------ */
+  public static ExecutionFailure cantFindSpecifiedFunction(String funcName) {
+    return ExecutionFailure.builder()
+        .failedAt(new Date())
+        .reason("DataValidationFailed")
+        .message(
+            String.format(
+                "Can't find specified function while validating data, function name: [%s]",
+                funcName))
+        .build();
+  }
+
+  public static ExecutionFailure invalidJsonFormation(String path) {
+    return ExecutionFailure.builder()
+        .failedAt(new Date())
+        .reason("DataValidationFailed")
+        .message(String.format("Can't find valid json node in path: [%s]", path))
         .build();
   }
 }
