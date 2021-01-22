@@ -39,6 +39,17 @@ public class ExecutionFailuresFactory {
         .build();
   }
 
+  public static ExecutionFailure unableToGetResultFromUnknownNode(Integer operatorId) {
+    return ExecutionFailure.builder()
+        .failedAt(new Date())
+        .reason("DataValidationFailed")
+        .message(
+            String.format(
+                "Data Validation Failed, unable to get result from unknown node, node id: %s.",
+                operatorId))
+        .build();
+  }
+
   public static ExecutionFailure unableToGetValueInNodeResult(String key) {
     return ExecutionFailure.builder()
         .failedAt(new Date())

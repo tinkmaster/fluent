@@ -85,6 +85,7 @@ public class ExecutionScheduler extends Thread {
                   String.valueOf(node.getId()),
                   FluentObjectMappers.getNewConfiguredJsonMapper().writeValueAsString(result));
         } catch (Throwable t) {
+          LOG.error("Failed to execute node:{}", node.getId(), t);
           Map<String, Object> result = new HashMap<>();
           if (t instanceof ExecutionFailure) {
             try {
@@ -108,7 +109,9 @@ public class ExecutionScheduler extends Thread {
                 .put(
                     String.valueOf(node.getId()),
                     "{ \"error\": \"Failed to executor operator, caused by: "
-                        + t.getMessage().replaceAll("\"", "\'")
+                        + (t.getMessage() != null
+                            ? t.getMessage().replaceAll("\"", "\'")
+                            : t.getMessage())
                         + "\"}");
           }
           node.setStatus(ExecutionStatus.FAILED);
@@ -116,7 +119,6 @@ public class ExecutionScheduler extends Thread {
           this.updateDiagramStatus();
           this.executionDiagram = null;
           this.status = SchedulerStatus.IDLE;
-          LOG.error("Failed to execute node:{}", node.getId(), t);
           break;
         }
       }
