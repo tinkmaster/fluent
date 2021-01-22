@@ -121,6 +121,9 @@ public class VariablesResolver {
       String[] remainingKeys,
       Integer operatorIndex,
       ExecutionDiagram diagram) {
+    if (diagram.getNodes().get(operatorIndex) == null) {
+      throw ExecutionFailuresFactory.unableToGetResultFromUnknownNode(operatorIndex);
+    }
     Operator op = diagram.getNodes().get(operatorIndex).getOperator();
 
     if (remainingKeys.length == 1) {
