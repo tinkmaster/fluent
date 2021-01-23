@@ -77,4 +77,27 @@ public class ExecutionFailuresFactory {
         .message(String.format("Can't find valid json node in path: [%s]", path))
         .build();
   }
+
+  public static ExecutionFailure cantFindSpecifiedJsonNode(String path) {
+    return ExecutionFailure.builder()
+        .failedAt(new Date())
+        .reason("DataValidationFailed")
+        .message(String.format("Can't find the specified json node by path: [%s]", path))
+        .build();
+  }
+
+  /**
+   * throw it out while using jackson jsonNode.at() to parse json path
+   *
+   * @param errorMessage passed by jackson illegal arguement message
+   * @return exception
+   */
+  public static ExecutionFailure jsonPathIllegalWhileParsingJacksonPathPointer(
+      String errorMessage) {
+    return ExecutionFailure.builder()
+        .failedAt(new Date())
+        .reason("DataValidationFailed")
+        .message(errorMessage)
+        .build();
+  }
 }

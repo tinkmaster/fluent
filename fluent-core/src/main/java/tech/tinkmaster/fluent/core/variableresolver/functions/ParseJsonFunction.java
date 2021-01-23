@@ -23,8 +23,8 @@ public class ParseJsonFunction implements FluentVariableResolveFunction {
    */
   @Override
   public String resolve(ExecutionDiagram diagram, String parameter) {
-    String path = parameter.substring(parameter.lastIndexOf(",") + 1, parameter.length());
-    String var = parameter.substring(0, parameter.lastIndexOf(","));
+    String path = parameter.substring(parameter.lastIndexOf(",") + 1, parameter.length()).trim();
+    String var = parameter.substring(0, parameter.lastIndexOf(",")).trim();
 
     String result = variablesResolver.resolve(diagram, var);
 
@@ -34,13 +34,14 @@ public class ParseJsonFunction implements FluentVariableResolveFunction {
       throw ExecutionFailuresFactory.invalidJsonFormation(var);
     }
 
-    String[] pathArr = path.split("\\.");
+    try {
+      node = node.at(path);
+    } catch (IllegalArgumentException e) {
+      throw ExecutionFailuresFactory.jsonPathIllegalWhileParsingJacksonPathPointer(e.getMessage());
+    }
 
-    for (int i = 0; i < pathArr.length; i++) {
-      node = node.path(pathArr[i]);
-      if (node.isMissingNode()) {
-        throw ExecutionFailuresFactory.invalidJsonFormation(path);
-      }
+    if (node.isMissingNode()) {
+      throw ExecutionFailuresFactory.cantFindSpecifiedJsonNode(path);
     }
 
     return node.asText();

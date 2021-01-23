@@ -110,7 +110,7 @@ public class ExecutionScheduler extends Thread {
                     String.valueOf(node.getId()),
                     "{ \"error\": \"Failed to executor operator, caused by: "
                         + (t.getMessage() != null
-                            ? t.getMessage().replaceAll("\"", "\'")
+                            ? t.getMessage().replaceAll("\"", "'")
                             : t.getMessage())
                         + "\"}");
           }
