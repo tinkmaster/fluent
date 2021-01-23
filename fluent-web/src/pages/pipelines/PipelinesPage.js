@@ -71,6 +71,9 @@ export class PipelinesPage extends React.Component {
     }
 
     selectPipeline = (name) => {
+        this.props.updatePipelinePageState('executionData', null, 
+            'selectedHistory', null, 
+            'selectedHistoryNode', null)
         this.props.selectPipeline(name)
         clearInterval(this.refreshHistoryTime)
         this.refreshHistoryTime = null
@@ -80,7 +83,6 @@ export class PipelinesPage extends React.Component {
         if (!this.refreshExecutionOverview) {
             this.refreshExecutionOverview = setInterval(() => this.props.getExecutionOverview(this.props.selectedPipeline.name), 10000)
         }
-        this.props.updatePipelinePageState('executionData', null, 'selectedHistory', null)
     }
 
     onElementClick = (event, element) => this.props.updatePipelinePageState("selectedHistoryNode", element.id)
@@ -190,7 +192,8 @@ export class PipelinesPage extends React.Component {
                         <div style={{width: '75%'}}>
                             { this.props.selectedHistoryNode ? 
                                 <ExecutionNodeInfo
-                                node={this.props.selectedHistory.nodes[this.props.selectedHistoryNode]}
+                                node={this.props.selectedHistory ? 
+                                    this.props.selectedHistory.nodes[this.props.selectedHistoryNode] : undefined}
                                 diagram={this.props.selectedHistory}
                                 /> : 
                                 (this.props.selectedHistory?
