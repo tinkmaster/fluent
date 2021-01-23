@@ -2,7 +2,8 @@ import {isNode} from "react-flow-renderer";
 
 const LIST_EXECUTION_DIAGRAM = "LIST_EXECUTION_DIAGRAM"
 const GET_EXECUTION_DIAGRAM = "GET_EXECUTION_DIAGRAM"
-export const PIPELINE_EDIT_OPERATOR = 'PIPELINE_EDIT_OPERATOR';
+const PIPELINE_EDIT_OPERATOR = 'PIPELINE_EDIT_OPERATOR';
+const GET_EXECUTION_OVERVIEW = 'GET_EXECUTION_OVERVIEW';
 
 export const listExecutionDiagramListAction = (data) => ({
     type: LIST_EXECUTION_DIAGRAM,
@@ -10,6 +11,10 @@ export const listExecutionDiagramListAction = (data) => ({
 })
 export const getExecutionDiagramListAction = (data) => ({
     type: GET_EXECUTION_DIAGRAM,
+    data: data
+})
+export const getExecutionOverviewAction = (data) => ({
+    type: GET_EXECUTION_OVERVIEW,
     data: data
 })
 
@@ -24,6 +29,11 @@ export const PipelinePageReducer = (state, action) => {
             return {
                 ...state,
                 selectedHistory: action.data
+            }
+        case GET_EXECUTION_OVERVIEW:
+            return {
+                ...state,
+                executionOverview: action.data
             }
         case PIPELINE_EDIT_OPERATOR:
             return {

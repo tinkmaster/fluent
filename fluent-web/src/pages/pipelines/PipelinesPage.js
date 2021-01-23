@@ -11,6 +11,7 @@ import {ExecutionHistoryList} from "../../components/executions/ExecutionHistory
 import {ExecutionHistoryOverview} from "../../components/executions/ExecutionHistoryOverview";
 import {ExecutionNodeInfo} from "../../components/executions/ExecutionNodeInfo";
 import {Empty} from "antd";
+import { SelectedExecutionOverview } from '../../components/executions/SelectedExecutionOverview';
 
 export class PipelinesPage extends React.Component {
 
@@ -19,6 +20,7 @@ export class PipelinesPage extends React.Component {
     }
 
     refreshTime;
+    refreshExecutionOverview;
     refreshHistoryTime;
 
     componentDidMount() {
@@ -27,7 +29,6 @@ export class PipelinesPage extends React.Component {
         this.props.listOperators();
         if (this.props.selectedPipeline) {
             this.refreshTime = setInterval(() => this.refreshHistoryList(), 3000)
-
             this.refreshHistoryList()
         }
     }
@@ -35,29 +36,37 @@ export class PipelinesPage extends React.Component {
     componentWillUnmount() {
         clearInterval(this.refreshTime)
         clearInterval(this.refreshHistoryTime)
+        clearInterval(this.refreshExecutionOverview)
         this.refreshTime = null
         this.refreshHistoryTime = null
+        this.refreshExecutionOverview = null;
         this.props.updatePipelinePageState('executionData', null,
-            'selectedHistory', null, "selectedHistoryNode", null)
+            'selectedHistory', null, "selectedHistoryNode", null, 'executionOverview', null)
     }
 
     getHistory(name) {
+        clearInterval(this.refreshExecutionOverview)
+        this.refreshExecutionOverview = null;
         this.props.getExactExecutionHistory(this.props.selectedPipeline.name, name)
         this.props.updatePipelinePageState("selectedHistoryNode", null)
         if (!this.refreshHistoryTime) {
-            this.refreshHistoryTime = setInterval(() => this.refreshHistoryDiagram(), 3000)
+            this.refreshHistoryTime = setInterval(() => this.refreshHistoryDiagram(), 8000)
         }
     }
 
     refreshHistoryList() {
         if (this.props.selectedPipeline) {
             this.props.listExecutionDiagram(this.props.selectedPipeline.name)
+            
         }
     }
 
     refreshHistoryDiagram() {
-        if (this.props.selectedHistory) {
+        if (this.props.selectedHistory && (this.props.selectedHistory.status !== 'FINISHED' && this.props.selectedHistory.status !== 'FAILED')) {
             this.props.getExactExecutionHistory(this.props.selectedPipeline.name, this.props.selectedHistory.name)
+        } else if (this.refreshHistoryTime){
+            clearInterval(this.refreshHistoryTime)
+            this.refreshHistoryTime = null;
         }
     }
 
@@ -66,7 +75,10 @@ export class PipelinesPage extends React.Component {
         clearInterval(this.refreshHistoryTime)
         this.refreshHistoryTime = null
         if (!this.refreshTime) {
-            this.refreshTime = setInterval(() => this.refreshHistoryList(), 3000)
+            this.refreshTime = setInterval(() => this.refreshHistoryList(), 10000)
+        }
+        if (!this.refreshExecutionOverview) {
+            this.refreshExecutionOverview = setInterval(() => this.props.getExecutionOverview(this.props.selectedPipeline.name), 10000)
         }
         this.props.updatePipelinePageState('executionData', null, 'selectedHistory', null)
     }
@@ -112,7 +124,6 @@ export class PipelinesPage extends React.Component {
         if (this.props.operators) {
             this.props.operators.sort()
         }
-
         return (
             <div className="pipeline-page-overview">
                 <PipelineList
@@ -177,13 +188,21 @@ export class PipelinesPage extends React.Component {
                             />
                         </div>
                         <div style={{width: '75%'}}>
-                            {this.props.selectedHistory && this.props.selectedHistoryNode ?
+                            { this.props.selectedHistoryNode ? 
                                 <ExecutionNodeInfo
-                                    node={this.props.selectedHistory.nodes[this.props.selectedHistoryNode]}
-                                    diagram={this.props.selectedHistory}
-                                />
-                                :
-                                <ExecutionHistoryOverview/>
+                                node={this.props.selectedHistory.nodes[this.props.selectedHistoryNode]}
+                                diagram={this.props.selectedHistory}
+                                /> : 
+                                (this.props.selectedHistory?
+                                    <SelectedExecutionOverview
+                                    selectedHistory={this.props.selectedHistory}
+                                    />
+                                    : 
+                                    <ExecutionHistoryOverview
+                                        executionOverview={this.props.executionOverview}
+                                        updatePipelinePageState={this.props.updatePipelinePageState}
+                                        selectedPipeline={this.props.selectedPipeline}
+                                    />)
                             }
                         </div>
                     </div>

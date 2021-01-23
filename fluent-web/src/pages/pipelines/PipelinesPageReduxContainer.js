@@ -7,7 +7,7 @@ import {
     selectPipeline,
     updatePipeline
 } from "../../services/PipelineService";
-import {createExecutionDiagram, getExecutionDiagram, listExecutionDiagram} from "../../services/ExecutionService";
+import {createExecutionDiagram, getExecutionDiagram, getExecutionOverview, listExecutionDiagram} from "../../services/ExecutionService";
 import {UPDATE_PIPELINE_PAGE, updatePipelineGraph} from "./PipelinesPageReducer";
 import {
     addOperatorToPipelineGraph,
@@ -29,7 +29,8 @@ const mapStateToProps = (state) => {
         operators: state.PipelinePageReducer.operators,
         selectedOperator: state.PipelinePageReducer.selectedOperator,
         operatorDetailsVisible: state.PipelinePageReducer.operatorDetailsVisible,
-        pipelineDetailsVisible: state.PipelinePageReducer.pipelineDetailsVisible
+        pipelineDetailsVisible: state.PipelinePageReducer.pipelineDetailsVisible,
+        executionOverview: state.PipelinePageReducer.executionOverview
     }
 }
 
@@ -80,6 +81,9 @@ const mapDispatchToProps = (dispatch) => ({
     },
     listExecutionDiagram: (name) => {
         dispatch(listExecutionDiagram(name))
+    },
+    getExecutionOverview: (name) => {
+        dispatch(getExecutionOverview(name))
     }
 })
 

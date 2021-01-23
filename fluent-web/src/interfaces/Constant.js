@@ -13,5 +13,6 @@ export const DELETE_PIPELINE_ADDRESS = SERVER_ADDRESS + "/api/v1/pipelines/{}";
 
 export const LIST_EXECUTION_ADDRESS = SERVER_ADDRESS + "/api/v1/executions/{}/diagram";
 export const POST_EXECUTION_ADDRESS = SERVER_ADDRESS + "/api/v1/executions";
+export const GET_EXECUTION_OVERVIEW_ADDRESS = SERVER_ADDRESS + "/api/v1/executions/{}/overview";
 export const GET_EXECUTION_ADDRESS = SERVER_ADDRESS + "/api/v1/executions/{0}/diagram/{1}";
 export const DELETE_EXECUTION_ADDRESS = SERVER_ADDRESS + "/api/v1/executions/{}";

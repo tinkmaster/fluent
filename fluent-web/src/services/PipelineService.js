@@ -6,7 +6,7 @@ import {
     POST_PIPELINE_ADDRESS
 } from "../interfaces/Constant";
 import {message} from 'antd';
-import {listExecutionDiagram} from "./ExecutionService";
+import {getExecutionOverview, listExecutionDiagram} from "./ExecutionService";
 import {
     editPipelineAction,
     freshPipelineListAction,
@@ -45,6 +45,7 @@ export function selectPipeline(name) {
         ).then(
             () => {
                 dispatch(listExecutionDiagram(name));
+                dispatch(getExecutionOverview(name))
             }
         )
     }

@@ -1,4 +1,5 @@
 .operator-list {
+    height: calc(100% - 40px);
     margin-left: auto;
     width: 25%;
     box-shadow: -5px -1px 5px 0px #e4e3e3;;
