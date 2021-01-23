@@ -10,6 +10,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
 import tech.tinkmaster.fluent.api.server.responses.ResponseEntity;
 import tech.tinkmaster.fluent.common.entity.execution.ExecutionDiagram;
+import tech.tinkmaster.fluent.common.entity.execution.ExecutionOverview;
 import tech.tinkmaster.fluent.common.entity.execution.ExecutionStatus;
 import tech.tinkmaster.fluent.common.entity.operator.Operator;
 import tech.tinkmaster.fluent.common.entity.pipeline.Pipeline;
@@ -31,6 +32,17 @@ public class ExecutionController {
       throw new FluentNotFoundException("Can't find execution named " + pipelineName);
     } else {
       return ResponseEntity.ok(diagrams);
+    }
+  }
+
+  @GetMapping(path = "{pipelineName}/overview")
+  public ResponseEntity overview(@PathVariable("pipelineName") String pipelineName)
+      throws IOException {
+    ExecutionOverview overview = this.service.getOverview(pipelineName);
+    if (overview == null) {
+      throw new FluentNotFoundException("Can't find pipeline named " + pipelineName);
+    } else {
+      return ResponseEntity.ok(overview);
     }
   }
 

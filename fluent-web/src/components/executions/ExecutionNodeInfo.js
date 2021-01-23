@@ -41,6 +41,7 @@ export class ExecutionNodeInfo extends React.Component {
                         dataValidationData = dataValidationData.concat(
                             {
                                 variable: variable,
+                                key: variable,
                                 status: nodeResult[variable]['result'],
                                 result: nodeResult[variable]['message']
                             }
@@ -51,6 +52,7 @@ export class ExecutionNodeInfo extends React.Component {
                         dataValidationData = dataValidationData.concat(
                             {
                                 variable: variable,
+                                key: variable,
                                 status: nodeResult['data'][variable]['result'],
                                 result: nodeResult['data'][variable]['message']
                             }
@@ -58,7 +60,6 @@ export class ExecutionNodeInfo extends React.Component {
                     })
                 }
             }
-            console.log(dataValidationData)
         }
         return (
             <div className={'execution-node-info'}>

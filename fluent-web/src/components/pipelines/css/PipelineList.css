@@ -1,6 +1,6 @@
 .pipeline-list {
     width: 25%;
-    height: 100%;
+    height: calc(100% - 40px);
     overflow: auto;
     box-shadow: 5px 2px 5px 0px #e4e3e3;
     z-index: 100;

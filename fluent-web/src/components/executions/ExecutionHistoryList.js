@@ -1,5 +1,6 @@
 import React, {Component} from "react";
 import {Col, List, Popover, Row} from "antd";
+import {timestampToDateTime} from '../../interfaces/Functions'
 import HourglassOutlined from "@ant-design/icons/lib/icons/HourglassOutlined";
 import LoadingOutlined from "@ant-design/icons/lib/icons/LoadingOutlined";
 import CheckOutlined from "@ant-design/icons/lib/icons/CheckOutlined";
@@ -10,14 +11,6 @@ export class ExecutionHistoryList extends Component {
 
     constructor(props, context) {
         super(props, context);
-
-        // this.props = {
-        //     executionDiagramList: [],
-        //     selectedHistory: {},
-        //     selectedHistoryNode: {},
-        //     updatePipelinePageState: PropTypes.function,
-        //     selectExecution: PropTypes.function
-        // }
     }
 
     render() {
@@ -49,7 +42,7 @@ export class ExecutionHistoryList extends Component {
                           >
                               <Row style={{'width': '100%', textAlign: 'center'}}>
                                   <Col span={16}>
-                                      {this.timestampToDateTime(new Date(item.createdTime))}
+                                      {timestampToDateTime(new Date(item.createdTime))}
                                   </Col>
                                   <Col span={8}>
                                       {item.status === 'CREATED' || item.status === 'WAITING_TO_BE_SCHEDULED' ?
@@ -81,27 +74,4 @@ export class ExecutionHistoryList extends Component {
         )
     }
 
-    timestampToDateTime(timestamp = Date.now(), format = 'yyyy-MM-dd HH:mm') {
-        if (isNaN(timestamp)) {
-            return '';
-        }
-
-        if (format.length < 4 || 'yyyy-MM-dd HH:mm'.indexOf(format) !== 0) {
-            return '';
-        }
-
-        const date = new Date(Number(timestamp));
-
-        const year = date.getFullYear();
-        const month = date.getMonth() + 1;
-        const day = date.getDate();
-        const hour = date.getHours();
-        const minute = date.getMinutes();
-
-        return format.replace('yyyy', year)
-            .replace('MM', month > 9 ? month : `0${month}`)
-            .replace('dd', day > 9 ? day : `0${day}`)
-            .replace('HH', hour > 9 ? hour : `0${hour}`)
-            .replace('mm', minute > 9 ? minute : `0${minute}`)
-    }
 }

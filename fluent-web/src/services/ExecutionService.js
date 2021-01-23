@@ -1,7 +1,7 @@
 import {get, post} from "../fetch/Fetch";
-import {GET_EXECUTION_ADDRESS, LIST_EXECUTION_ADDRESS, POST_EXECUTION_ADDRESS} from "../interfaces/Constant";
+import {GET_EXECUTION_ADDRESS, GET_EXECUTION_OVERVIEW_ADDRESS, LIST_EXECUTION_ADDRESS, POST_EXECUTION_ADDRESS} from "../interfaces/Constant";
 import {message} from "antd";
-import {getExecutionDiagramListAction, listExecutionDiagramListAction} from "../pages/pipelines/PipelinesPageReducer";
+import {getExecutionDiagramListAction, getExecutionOverviewAction, listExecutionDiagramListAction} from "../pages/pipelines/PipelinesPageReducer";
 import {updatePipelinePageState} from "../pages/pipelines/PipelinesPageReduxContainer";
 import {drawExecutionGraph} from "./GraphService";
 
@@ -46,4 +46,15 @@ export function getExecutionDiagram(pipelineName, name) {
     }
 }
 
-
+export function getExecutionOverview(pipelineName) {
+    return dispatch => {
+        get(GET_EXECUTION_OVERVIEW_ADDRESS.replace('{}', pipelineName))
+        .then(
+            response => {
+                if (response.data.code === 200) {
+                    dispatch(getExecutionOverviewAction(response.data.data));
+                }
+            }
+        )
+    }
+}
