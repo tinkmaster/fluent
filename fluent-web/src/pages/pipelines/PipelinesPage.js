@@ -40,8 +40,6 @@ export class PipelinesPage extends React.Component {
         this.refreshTime = null
         this.refreshHistoryTime = null
         this.refreshExecutionOverview = null;
-        this.props.updatePipelinePageState('executionData', null,
-            'selectedHistory', null, "selectedHistoryNode", null, 'executionOverview', null)
     }
 
     getHistory(name) {
@@ -57,7 +55,6 @@ export class PipelinesPage extends React.Component {
     refreshHistoryList() {
         if (this.props.selectedPipeline) {
             this.props.listExecutionDiagram(this.props.selectedPipeline.name)
-            
         }
     }
 

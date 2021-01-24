@@ -14,7 +14,6 @@ const layout = {
 
 
 const onFinishFailed = errorInfo => {
-    console.log('Failed:', errorInfo);
 };
 
 export class OperatorDetails extends Component {

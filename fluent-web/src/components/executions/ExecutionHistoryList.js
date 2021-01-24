@@ -39,6 +39,7 @@ export class ExecutionHistoryList extends Component {
                                   paddingLeft: 24,
                                   paddingRight: 24
                               }}
+                              className='execution-history-list-item'
                           >
                               <Row style={{'width': '100%', textAlign: 'center'}}>
                                   <Col span={16}>

@@ -12,8 +12,8 @@
     display: flex;
 }
 
-.execution-history-list-item {
-
+.execution-history-list-item:hover {
+    background: #e1e1e1;
 }
 
 

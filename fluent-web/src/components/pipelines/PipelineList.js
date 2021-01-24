@@ -7,12 +7,6 @@ export class PipelineList extends Component {
 
     constructor(props, context) {
         super(props, context);
-
-        // this.props = {
-        //     pipelines: [],
-        //     selectedPipeline: {},
-        //     selectPipeline: PropTypes.function,
-        // }
     }
 
     render() {

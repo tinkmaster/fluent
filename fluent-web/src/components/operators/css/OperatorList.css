@@ -1,9 +1,10 @@
 .operator-list {
     height: calc(100% - 40px);
     margin-left: auto;
-    width: 25%;
+    min-width: 25%;
     box-shadow: -5px -1px 5px 0px #e4e3e3;;
     overflow: auto;
+    width: fit-content;
 }
 
 .operator-list .ant-popover-inner-content {
@@ -28,7 +29,7 @@
 }
 
 .operator-list-item:hover {
-    background: grey;
+    background: #e1e1e1;
 }
 
 .operator-list-item:hover .operator-list-item-icon {
