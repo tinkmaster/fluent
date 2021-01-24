@@ -17,6 +17,7 @@ import tech.tinkmaster.fluent.common.entity.execution.ExecutionDiagram;
 import tech.tinkmaster.fluent.core.scheduler.ExecutionScheduler;
 import tech.tinkmaster.fluent.core.scheduler.SchedulerStatus;
 import tech.tinkmaster.fluent.service.execution.ExecutionService;
+import tech.tinkmaster.fluent.service.variable.VariableService;
 
 @Component
 public class PipelineSchedulerService implements ApplicationContextAware {
@@ -26,6 +27,7 @@ public class PipelineSchedulerService implements ApplicationContextAware {
   private List<ExecutionDiagram> diagramsWaitingList;
 
   @Autowired private ExecutionService executionService;
+  @Autowired private VariableService variableService;
   private static ApplicationContext applicationContext;
 
   @Override
@@ -34,7 +36,7 @@ public class PipelineSchedulerService implements ApplicationContextAware {
   }
 
   private PipelineSchedulerService() {
-    int cpuCores = 1;
+    int cpuCores = Runtime.getRuntime().availableProcessors();
     this.executorService = Executors.newFixedThreadPool(cpuCores);
     this.schedulerList = new ArrayList<>(cpuCores);
     this.diagramsWaitingList = new LinkedList<>();
@@ -72,5 +74,9 @@ public class PipelineSchedulerService implements ApplicationContextAware {
     } catch (IOException e) {
       // ignored
     }
+  }
+
+  public static VariableService getVariableService() {
+    return schedulerService.variableService;
   }
 }

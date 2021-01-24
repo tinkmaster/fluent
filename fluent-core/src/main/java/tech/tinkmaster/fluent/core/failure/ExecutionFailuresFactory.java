@@ -11,6 +11,15 @@ public class ExecutionFailuresFactory {
         .build();
   }
 
+  public static ExecutionFailure failToResolveVariable(String variable, String errorMsg) {
+    return ExecutionFailure.builder()
+        .failedAt(new Date())
+        .reason("ResolveVariablesFailure")
+        .message(
+            String.format("Can't resolve the variable [%s], caused by: %s", variable, errorMsg))
+        .build();
+  }
+
   public static ExecutionFailure unableToTranslateExecutionInfoToJsonNode() {
     return ExecutionFailure.builder()
         .failedAt(new Date())
@@ -55,6 +64,43 @@ public class ExecutionFailuresFactory {
         .failedAt(new Date())
         .reason("DataValidationFailed")
         .message(String.format("Data Validation Failed, unable to fetch value from key:%s", key))
+        .build();
+  }
+
+  /** ------------------------- Exceptions about resolve variables ------------------------------ */
+  public static ExecutionFailure cantFindEnv(String name) {
+    return ExecutionFailure.builder()
+        .failedAt(new Date())
+        .reason("DataValidationFailed")
+        .message(String.format("Can't find specified environment, env name: [%s]", name))
+        .build();
+  }
+
+  public static ExecutionFailure cantFindEnvVariable(String varName) {
+    return ExecutionFailure.builder()
+        .failedAt(new Date())
+        .reason("DataValidationFailed")
+        .message(
+            String.format(
+                "Can't find specified environment variable, variable name: [%s]", varName))
+        .build();
+  }
+
+  public static ExecutionFailure cantFindGlobalVariable(String varName) {
+    return ExecutionFailure.builder()
+        .failedAt(new Date())
+        .reason("DataValidationFailed")
+        .message(
+            String.format("Can't find specified global variable, variable name: [%s]", varName))
+        .build();
+  }
+
+  public static ExecutionFailure cantFindSecretVariable(String varName) {
+    return ExecutionFailure.builder()
+        .failedAt(new Date())
+        .reason("DataValidationFailed")
+        .message(
+            String.format("Can't find specified secret variable, variable name: [%s]", varName))
         .build();
   }
 

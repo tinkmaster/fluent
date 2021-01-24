@@ -8,6 +8,7 @@ import tech.tinkmaster.fluent.common.entity.operator.Operator;
 import tech.tinkmaster.fluent.core.failure.ExecutionFailure;
 import tech.tinkmaster.fluent.core.failure.ExecutionFailuresFactory;
 import tech.tinkmaster.fluent.core.variableresolver.VariablesResolver;
+import tech.tinkmaster.fluent.service.variable.VariableService;
 
 /**
  * This class is used for checking if the data is as expected.
@@ -26,12 +27,18 @@ public class DataValidationOperatorExecutor implements OperatorExecutor {
   private static final String EQUAL_RESULT_MESSAGE_TEMPLATE = "var:%s equals with value:%s.";
   private static final String NOT_EQUAL_RESULT_MESSAGE_TEMPLATE =
       "key:%s does not equal with value:%s.";
+  private static final String SECRET_EQUAL_RESULT_MESSAGE =
+      "These two values equal with each other";
+  private static final String SECRET_NOT_EQUAL_RESULT_MESSAGE = "These two values do not equal";
   private Operator operator;
   private ExecutionDiagram diagram;
+  private VariableService variableService;
 
-  public DataValidationOperatorExecutor(ExecutionDiagram diagram, Operator operator) {
+  public DataValidationOperatorExecutor(
+      ExecutionDiagram diagram, Operator operator, VariableService variableService) {
     this.operator = operator;
     this.diagram = diagram;
+    this.variableService = variableService;
   }
 
   @Override
@@ -41,14 +48,15 @@ public class DataValidationOperatorExecutor implements OperatorExecutor {
     params.forEach(
         (k, v) -> {
           try {
-            String var = variablesResolver.resolve(this.diagram, k);
+            String var = variablesResolver.resolve(this.diagram, k, this.variableService);
 
             // extract function name from value
             String functionName = v.substring(0, v.indexOf(","));
             String unresolvedValue = v.substring(v.indexOf(",") + 1);
-            String value = variablesResolver.resolve(this.diagram, unresolvedValue);
+            String value =
+                variablesResolver.resolve(this.diagram, unresolvedValue, this.variableService);
 
-            validationResult.put(k, this.check(functionName, var, value));
+            validationResult.put(k, this.check(functionName, var, value, k.contains("#{secret.")));
           } catch (ExecutionFailure e) {
             validationResult.put(
                 k,
@@ -69,38 +77,42 @@ public class DataValidationOperatorExecutor implements OperatorExecutor {
     return validationResult;
   }
 
-  private Map<String, String> check(String funcName, String key, String value) {
+  private Map<String, String> check(
+      String funcName, String key, String value, boolean containsSecret) {
     Map<String, String> result = new HashMap<>();
 
+    System.out.println(key);
+    String value1 =
+        containsSecret
+            ? SECRET_NOT_EQUAL_RESULT_MESSAGE
+            : String.format(NOT_EQUAL_RESULT_MESSAGE_TEMPLATE, key, value);
+    String value2 =
+        containsSecret
+            ? SECRET_EQUAL_RESULT_MESSAGE
+            : String.format(EQUAL_RESULT_MESSAGE_TEMPLATE, key, value);
     if ("equals".equals(funcName)) {
       if (key.equals(value)) {
         result.put(CHECK_RESULT_KEY, Boolean.TRUE.toString());
-        result.put(
-            CHECK_RESULT_MESSAGE_KEY, String.format(EQUAL_RESULT_MESSAGE_TEMPLATE, key, value));
+        result.put(CHECK_RESULT_MESSAGE_KEY, value2);
       } else {
         result.put(CHECK_RESULT_KEY, Boolean.FALSE.toString());
-        result.put(
-            CHECK_RESULT_MESSAGE_KEY, String.format(NOT_EQUAL_RESULT_MESSAGE_TEMPLATE, key, value));
+        result.put(CHECK_RESULT_MESSAGE_KEY, value1);
       }
     } else if ("notEquals".equals(funcName)) {
       if (!key.equals(value)) {
         result.put(CHECK_RESULT_KEY, Boolean.TRUE.toString());
-        result.put(
-            CHECK_RESULT_MESSAGE_KEY, String.format(NOT_EQUAL_RESULT_MESSAGE_TEMPLATE, key, value));
+        result.put(CHECK_RESULT_MESSAGE_KEY, value1);
       } else {
         result.put(CHECK_RESULT_KEY, Boolean.FALSE.toString());
-        result.put(
-            CHECK_RESULT_MESSAGE_KEY, String.format(EQUAL_RESULT_MESSAGE_TEMPLATE, key, value));
+        result.put(CHECK_RESULT_MESSAGE_KEY, value2);
       }
     } else {
       if (key.equals(value)) {
         result.put(CHECK_RESULT_KEY, Boolean.TRUE.toString());
-        result.put(
-            CHECK_RESULT_MESSAGE_KEY, String.format(EQUAL_RESULT_MESSAGE_TEMPLATE, key, value));
+        result.put(CHECK_RESULT_MESSAGE_KEY, value2);
       } else {
         result.put(CHECK_RESULT_KEY, Boolean.FALSE.toString());
-        result.put(
-            CHECK_RESULT_MESSAGE_KEY, String.format(NOT_EQUAL_RESULT_MESSAGE_TEMPLATE, key, value));
+        result.put(CHECK_RESULT_MESSAGE_KEY, value1);
       }
     }
 
