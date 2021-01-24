@@ -1,0 +1,22 @@
+
+.global-variables-form {
+    padding-top: 18px;
+    background: #fff
+}
+
+.global-variables-form h1{
+    padding-left: 16px;
+}
+
+.global-var-form {
+    padding: 18px;
+    width: 100%;
+    background: #fff;
+    display: 'flex';
+    flex-direction: column;
+    overflow: auto;
+}
+
+.global-var-form .ant-space-item{
+    width: 100%;
+}

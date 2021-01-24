@@ -1,0 +1,40 @@
+.environment-form {
+    display: flex;
+    height: calc(100vh - 120px);
+}
+.environment-list-title {
+    padding-left: 24px;
+    padding-right: 24px;
+    font-weight: bold;
+    font-size: medium;
+    display: flex;
+}
+
+.environment-list-item:hover {
+    background: #e1e1e1;
+}
+
+.environment-list-item-icon {
+    display: none;
+}
+
+.environment-list-item:hover .environment-list-item-icon {
+    display: block;
+}
+
+.environment-list-item-icon:hover {
+    color: white;
+}
+
+.env-var-form {
+    padding: 18px;
+    width: 100%;
+    background: #fff;
+    display: 'flex';
+    flex-direction: column;
+    overflow: auto;
+}
+
+.env-var-form .ant-space-item{
+    width: 100%;
+}

@@ -9,7 +9,6 @@ const layout = {
     wrapperCol: {span: 17},
 };
 const onFinishFailed = errorInfo => {
-    console.log('Failed:', errorInfo);
 };
 
 export class PipelineDetails extends Component {
@@ -48,7 +47,6 @@ export class PipelineDetails extends Component {
                         label="Pipeline Name"
                         name="name"
                         rules={[{required: true, message: 'Please input your pipeline name!'}]}
-                        initialValue={this.props.selectedOperator ? this.props.selectedOperator.name : null}
                     >
                         <Input/>
                     </Form.Item>
