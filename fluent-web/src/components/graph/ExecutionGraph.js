@@ -2,6 +2,7 @@ import React from "react";
 import {edgeTypes} from "./DataFlowEdgeType";
 import {nodeTypes} from "./DataFlowNodeTypes";
 import ReactFlow, {Controls, MiniMap} from "react-flow-renderer";
+import {Row} from 'antd';
 
 
 export class ExecutionGraph extends React.Component {
@@ -34,28 +35,19 @@ export class ExecutionGraph extends React.Component {
                         }
                     }}
                 />
-                {/*<div*/}
-                {/*    style={{*/}
-                {/*        position: 'absolute',*/}
-                {/*        left: 32,*/}
-                {/*        top: 32,*/}
-                {/*        zIndex: 4,*/}
-                {/*        textTransform: 'none'*/}
-                {/*    }}>*/}
-                {/*    <Row>*/}
-
-                {/*        <Col>*/}
-                {/*            <Button type="primary" shape="round" onClick={this.props.saveDiagram}>Save*/}
-                {/*                Diagram</Button>*/}
-                {/*        </Col>*/}
-                {/*        <Col>*/}
-                {/*            <Button type="primary" shape="round" danger style={{marginLeft: 26}}*/}
-                {/*                    onClick={this.props.runDiagram}>*/}
-                {/*                Run Pipeline*/}
-                {/*            </Button>*/}
-                {/*        </Col>*/}
-                {/*    </Row>*/}
-                {/*</div>*/}
+                <div
+                    style={{
+                        position: 'absolute',
+                        left: 32,
+                        top: 32,
+                        zIndex: 4,
+                        textTransform: 'none'
+                    }}>
+                    <Row>
+                        <h2>Env:</h2>
+                        <p style={{paddingTop: 8, paddingLeft: 8 }}>{this.props.selectedHistory.environment ? this.props.selectedHistory.environment : 'Have not chosen.'}</p>
+                    </Row>
+                </div>
                 <Controls/>
             </ReactFlow>
         )

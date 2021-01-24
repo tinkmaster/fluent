@@ -82,6 +82,8 @@ public class VariablesResolver {
         return this.getPipelineValue(varName, keys, remainingKeys, diagram);
       case "env":
         return this.getEnvValue(varName, remainingKeys, variableService);
+      case "currentEnv":
+        return this.getCurrentEnvValue(varName, remainingKeys, variableService, diagram);
       case "global":
         return this.getGlobalValue(varName, remainingKeys, variableService);
       case "secret":
@@ -120,6 +122,28 @@ public class VariablesResolver {
       Environment env = variableService.getEnv(keys[0]);
       if (env == null) {
         throw ExecutionFailuresFactory.cantFindEnv(keys[0]);
+      }
+      String value = env.getVariables().get(name);
+      if (value == null) {
+        throw ExecutionFailuresFactory.cantFindEnvVariable(wholeName);
+      }
+      return value;
+    } catch (IOException e) {
+      LOG.error("Error occurred while fetching environment variables", e);
+      throw ExecutionFailuresFactory.failToResolveVariable(wholeName, e.getMessage());
+    }
+  }
+
+  private String getCurrentEnvValue(
+      String wholeName, String[] keys, VariableService variableService, ExecutionDiagram diagram) {
+    if (diagram.getEnvironment() == null) {
+      throw ExecutionFailuresFactory.cantUseCurrentEnvVariable();
+    }
+    String name = this.getVariableName(keys);
+    try {
+      Environment env = variableService.getEnv(diagram.getEnvironment());
+      if (env == null) {
+        throw ExecutionFailuresFactory.cantFindEnv(diagram.getEnvironment());
       }
       String value = env.getVariables().get(name);
       if (value == null) {

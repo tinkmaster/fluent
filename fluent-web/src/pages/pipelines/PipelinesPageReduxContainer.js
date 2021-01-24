@@ -16,6 +16,7 @@ import {
     listOperators,
     postOperator
 } from "../../services/OperatorService";
+import {listEnv} from '../../services/VariableService'
 
 const mapStateToProps = (state) => {
     return {
@@ -30,7 +31,11 @@ const mapStateToProps = (state) => {
         selectedOperator: state.PipelinePageReducer.selectedOperator,
         operatorDetailsVisible: state.PipelinePageReducer.operatorDetailsVisible,
         pipelineDetailsVisible: state.PipelinePageReducer.pipelineDetailsVisible,
-        executionOverview: state.PipelinePageReducer.executionOverview
+        executionOverview: state.PipelinePageReducer.executionOverview,
+
+        envsList: state.VariablePageReducer.envsList,
+        pipelineSelectedEnv: state.PipelinePageReducer.pipelineSelectedEnv,
+        envSelectLoading: state.PipelinePageReducer.envSelectLoading
     }
 }
 
@@ -84,6 +89,10 @@ const mapDispatchToProps = (dispatch) => ({
     },
     getExecutionOverview: (name) => {
         dispatch(getExecutionOverview(name))
+    },
+
+    listEnv: () => {
+        dispatch(listEnv())
     }
 })
 

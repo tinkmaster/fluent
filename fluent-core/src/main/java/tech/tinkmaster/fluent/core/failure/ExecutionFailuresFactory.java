@@ -86,6 +86,15 @@ public class ExecutionFailuresFactory {
         .build();
   }
 
+  public static ExecutionFailure cantUseCurrentEnvVariable() {
+    return ExecutionFailure.builder()
+        .failedAt(new Date())
+        .reason("DataValidationFailed")
+        .message(
+            "Can't use currentEnv variable while having not chosen the env in the pipeline or execution plan.")
+        .build();
+  }
+
   public static ExecutionFailure cantFindGlobalVariable(String varName) {
     return ExecutionFailure.builder()
         .failedAt(new Date())
