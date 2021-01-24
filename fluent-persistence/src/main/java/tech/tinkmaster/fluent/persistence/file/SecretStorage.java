@@ -76,7 +76,9 @@ public class SecretStorage {
           this.mappers.readValue(
               FileUtils.readFileToString(file, Charset.defaultCharset()), Secret.class);
       secret.setValue(
-          Arrays.toString(decrypt(this.secretCipherBytes, secret.getValue().getBytes())));
+          new String(
+              decrypt(this.secretCipherBytes, Base64.getDecoder().decode(secret.getValue())),
+              "UTF-8"));
       return secret;
     } else {
       return null;
@@ -90,7 +92,7 @@ public class SecretStorage {
     }
     secret.setValue(
         Base64.getEncoder()
-            .encodeToString(encrypt(this.secretCipherBytes, secret.getValue().getBytes())));
+            .encodeToString(encrypt(this.secretCipherBytes, secret.getValue().getBytes("UTF-8"))));
     String operatorAsYaml = this.mappers.writeValueAsString(secret);
     FileUtils.writeStringToFile(file, operatorAsYaml, Charset.defaultCharset());
   }
@@ -124,24 +126,19 @@ public class SecretStorage {
   public static byte[] encrypt(byte[] key, byte[] input) throws GeneralSecurityException {
     Cipher cipher = Cipher.getInstance("AES/CBC/PKCS5Padding");
     SecretKeySpec keySpec = new SecretKeySpec(key, "AES");
-    // CBC模式需要生成一个16 bytes的initialization vector:
     SecureRandom sr = SecureRandom.getInstanceStrong();
     byte[] iv = sr.generateSeed(16);
     IvParameterSpec ivps = new IvParameterSpec(iv);
     cipher.init(Cipher.ENCRYPT_MODE, keySpec, ivps);
     byte[] data = cipher.doFinal(input);
-    // IV不需要保密，把IV和密文一起返回:
     return join(iv, data);
   }
 
-  // 解密:
   public static byte[] decrypt(byte[] key, byte[] input) throws GeneralSecurityException {
-    // 把input分割成IV和密文:
     byte[] iv = new byte[16];
     byte[] data = new byte[input.length - 16];
     System.arraycopy(input, 0, iv, 0, 16);
     System.arraycopy(input, 16, data, 0, data.length);
-    // 解密:
     Cipher cipher = Cipher.getInstance("AES/CBC/PKCS5Padding");
     SecretKeySpec keySpec = new SecretKeySpec(key, "AES");
     IvParameterSpec ivps = new IvParameterSpec(iv);
@@ -166,5 +163,12 @@ public class SecretStorage {
       }
     }
     return sb.toString();
+  }
+
+  public static void main(String[] args) throws IOException, GeneralSecurityException {
+    SecretStorage secretStorage = new SecretStorage();
+    secretStorage.baseDir = "database";
+    secretStorage.init();
+    System.out.println(secretStorage.get("ss").getValue());
   }
 }

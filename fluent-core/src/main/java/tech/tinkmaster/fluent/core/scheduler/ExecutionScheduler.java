@@ -16,6 +16,7 @@ import tech.tinkmaster.fluent.core.PipelineSchedulerService;
 import tech.tinkmaster.fluent.core.failure.ExecutionFailure;
 import tech.tinkmaster.fluent.core.scheduler.executors.OperatorExecutionFetcher;
 import tech.tinkmaster.fluent.core.scheduler.executors.OperatorExecutor;
+import tech.tinkmaster.fluent.service.variable.VariableService;
 
 @Getter
 public class ExecutionScheduler extends Thread {
@@ -24,6 +25,7 @@ public class ExecutionScheduler extends Thread {
   int scheduleId;
   SchedulerStatus status;
   ExecutionDiagram executionDiagram;
+  VariableService variableService;
 
   public ExecutionScheduler(int id) {
     this.scheduleId = id;
@@ -41,6 +43,9 @@ public class ExecutionScheduler extends Thread {
       if (this.executionDiagram == null) {
         this.sleep();
         continue;
+      }
+      if (this.variableService == null) {
+        this.variableService = PipelineSchedulerService.getVariableService();
       }
       // to detest if execution diagram rerun, we fail it ASAP if one operator is FAILED.
       this.executionDiagram
@@ -127,7 +132,8 @@ public class ExecutionScheduler extends Thread {
 
   private Object executeOperator(Operator operator) throws IOException {
     OperatorExecutor executor =
-        OperatorExecutionFetcher.getPairedExecutor(this.executionDiagram, operator);
+        OperatorExecutionFetcher.getPairedExecutor(
+            this.executionDiagram, operator, this.variableService);
     return executor.execute();
   }
 

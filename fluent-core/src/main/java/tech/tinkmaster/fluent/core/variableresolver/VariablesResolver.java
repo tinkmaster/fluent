@@ -3,6 +3,7 @@ package tech.tinkmaster.fluent.core.variableresolver;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import java.io.IOException;
 import java.util.*;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
@@ -11,8 +12,11 @@ import org.slf4j.LoggerFactory;
 import tech.tinkmaster.fluent.common.FluentObjectMappers;
 import tech.tinkmaster.fluent.common.entity.execution.ExecutionDiagram;
 import tech.tinkmaster.fluent.common.entity.operator.Operator;
+import tech.tinkmaster.fluent.common.entity.variable.Environment;
+import tech.tinkmaster.fluent.common.exceptions.FluentSecretDecryptException;
 import tech.tinkmaster.fluent.core.failure.ExecutionFailuresFactory;
 import tech.tinkmaster.fluent.core.variableresolver.functions.FluentVariableResolveFunctionCenter;
+import tech.tinkmaster.fluent.service.variable.VariableService;
 
 /** This class is used for resolving the variables in the operators parameters */
 public class VariablesResolver {
@@ -32,7 +36,7 @@ public class VariablesResolver {
    * @param content
    * @return
    */
-  public String resolve(ExecutionDiagram diagram, String content) {
+  public String resolve(ExecutionDiagram diagram, String content, VariableService variableService) {
     // find all the level-top variable replacement
     List<String> variables = findPotentialVariables(content);
     Map<String, String> maps = new HashMap<>();
@@ -50,10 +54,10 @@ public class VariablesResolver {
             maps.put(
                 var,
                 FluentVariableResolveFunctionCenter.resolve(
-                    diagram, functionName, variableContent));
+                    diagram, functionName, variableContent, variableService));
           } else if (matcher.find()) {
             String placement = matcher.group(1);
-            maps.put(var, this.resolvePlacement(placement, diagram));
+            maps.put(var, this.resolvePlacement(placement, diagram, variableService));
           }
         });
 
@@ -66,7 +70,8 @@ public class VariablesResolver {
     return content;
   }
 
-  private String resolvePlacement(String varName, ExecutionDiagram diagram) {
+  private String resolvePlacement(
+      String varName, ExecutionDiagram diagram, VariableService variableService) {
     String[] keys = varName.split("\\.");
 
     String[] remainingKeys = Arrays.copyOfRange(keys, 1, keys.length);
@@ -75,6 +80,12 @@ public class VariablesResolver {
     switch (keys[0]) {
       case "pipeline":
         return this.getPipelineValue(varName, keys, remainingKeys, diagram);
+      case "env":
+        return this.getEnvValue(varName, remainingKeys, variableService);
+      case "global":
+        return this.getGlobalValue(varName, remainingKeys, variableService);
+      case "secret":
+        return this.getSecretValue(varName, remainingKeys, variableService);
       default:
         break;
     }
@@ -101,6 +112,52 @@ public class VariablesResolver {
       }
     }
     throw ExecutionFailuresFactory.failToResolveVariable(varName);
+  }
+
+  private String getEnvValue(String wholeName, String[] keys, VariableService variableService) {
+    String name = this.getVariableName(keys, 1);
+    try {
+      Environment env = variableService.getEnv(keys[0]);
+      if (env == null) {
+        throw ExecutionFailuresFactory.cantFindEnv(keys[0]);
+      }
+      String value = env.getVariables().get(name);
+      if (value == null) {
+        throw ExecutionFailuresFactory.cantFindEnvVariable(wholeName);
+      }
+      return value;
+    } catch (IOException e) {
+      LOG.error("Error occurred while fetching environment variables", e);
+      throw ExecutionFailuresFactory.failToResolveVariable(wholeName, e.getMessage());
+    }
+  }
+
+  private String getGlobalValue(String wholeName, String[] keys, VariableService variableService) {
+    String name = this.getVariableName(keys);
+    try {
+      String value = variableService.getGlobal().getVariables().get(name);
+      if (value == null) {
+        throw ExecutionFailuresFactory.cantFindGlobalVariable(wholeName);
+      }
+      return value;
+    } catch (IOException e) {
+      LOG.error("Error occurred while fetching global variables", e);
+      throw ExecutionFailuresFactory.failToResolveVariable(wholeName, e.getMessage());
+    }
+  }
+
+  private String getSecretValue(String wholeName, String[] keys, VariableService variableService) {
+    String name = this.getVariableName(keys);
+    try {
+      String value = variableService.getTranslucentSecret(name).getValue();
+      if (value == null) {
+        throw ExecutionFailuresFactory.cantFindSecretVariable(wholeName);
+      }
+      return value;
+    } catch (IOException | FluentSecretDecryptException e) {
+      LOG.error("Error occurred while fetching secret variables", e);
+      throw ExecutionFailuresFactory.failToResolveVariable(wholeName, e.getMessage());
+    }
   }
 
   /**
