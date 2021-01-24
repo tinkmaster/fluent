@@ -53,7 +53,7 @@ export class ExecutionHistoryOverview extends Component {
                         </Col>
                         <Col span={8}>
                             <Statistic title="Failure" value={
-                                this.props.executionOverview.successfulExecutionNumber
+                                this.props.executionOverview.failedExecutionNumber
                                 }/>
                         </Col>
                         <Col span={8}>
