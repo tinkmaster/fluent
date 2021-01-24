@@ -68,7 +68,8 @@ export const PipelinePageReducer = (state, action) => {
         case UPDATE_FLOW_GRAPH:
             return {
                 ...state,
-                pipelineData: action.data
+                pipelineData: action.data,
+                envSelectLoading: false
             }
         case EDIT_OPERATORS:
             return {

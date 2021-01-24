@@ -27,6 +27,7 @@ export class PipelinesPage extends React.Component {
         document.title = "Fluent Web | Pipelines"
         this.props.listPipelines()
         this.props.listOperators();
+        this.props.listEnv();
         if (this.props.selectedPipeline) {
             this.refreshTime = setInterval(() => this.refreshHistoryList(), 3000)
             this.refreshHistoryList()
@@ -70,7 +71,9 @@ export class PipelinesPage extends React.Component {
     selectPipeline = (name) => {
         this.props.updatePipelinePageState('executionData', null, 
             'selectedHistory', null, 
-            'selectedHistoryNode', null)
+            'selectedHistoryNode', null,
+            'pipelineSelectedEnv', null,
+            'envSelectLoading', true)
         this.props.selectPipeline(name)
         clearInterval(this.refreshHistoryTime)
         this.refreshHistoryTime = null
@@ -159,17 +162,22 @@ export class PipelinesPage extends React.Component {
                             :
                             this.props.selectedHistory && this.props.executionData ?
                                 <ExecutionGraph
+                                    selectedHistory={this.props.selectedHistory}
                                     executionData={this.props.executionData}
                                     updatePipelinePageState={this.props.updatePipelinePageState}
                                 />
                                 :
                                 <PipelineGraph
+                                    envsList={this.props.envsList}
+                                    pipelineSelectedEnv={this.props.pipelineSelectedEnv}
+                                    envSelectLoading={this.props.envSelectLoading}
                                     pipelineData={this.props.pipelineData}
                                     selectedPipeline={this.props.selectedPipeline}
                                     updatePipelineGraph={this.props.updatePipelineGraph}
                                     runPipeline={this.props.runPipeline}
                                     updatePipeline={this.props.updatePipeline}
                                     updateGraph={this.props.updatePipelineGraph}
+                                    updatePipelinePageState={this.props.updatePipelinePageState}
                                 />
                         }
                     </div>

@@ -1,7 +1,5 @@
 package tech.tinkmaster.fluent.common.entity.pipeline;
 
-import java.util.HashMap;
-import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 import lombok.Builder;
@@ -16,12 +14,5 @@ public class Pipeline {
   Map<Integer, String> operators;
   List<String> connections;
   Map<String, String> parameters;
-
-  public Pipeline deepClone() {
-    return Pipeline.builder()
-        .operators(new HashMap<>(this.operators))
-        .parameters(new HashMap<>(this.parameters))
-        .connections(new LinkedList<>(this.connections))
-        .build();
-  }
+  String environment;
 }

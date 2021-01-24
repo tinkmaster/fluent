@@ -79,15 +79,11 @@ public class ExecutionController {
               String[] arr = value.split("->");
               cons.add(Pair.of(Integer.valueOf(arr[0]), Integer.valueOf(arr[1])));
             });
-    ExecutionDiagram diagram = new ExecutionDiagram(pipeline.getName(), operatorMap, cons);
+    System.out.println(pipeline.getEnvironment());
+    ExecutionDiagram diagram =
+        new ExecutionDiagram(pipeline.getName(), operatorMap, cons, pipeline.getEnvironment());
     diagram.setStatus(ExecutionStatus.WAITING_TO_BE_SCHEDULED);
     this.service.updateOrCreate(diagram);
     return ResponseEntity.ok(diagram);
   }
-
-  //  @DeleteMapping(path = "{name}")
-  //  public ResponseEntity delete(@PathVariable("name") String name) throws IOException {
-  //      this.service.delete(name);
-  //    return ResponseEntity.ok(null);
-  //  }
 }
