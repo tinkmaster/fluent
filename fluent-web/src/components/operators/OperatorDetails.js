@@ -2,15 +2,18 @@ import React, { Component } from 'react';
 import { Button, Form, Input, Modal, Row, Col, Select, Space } from "antd";
 import PlusOutlined from "@ant-design/icons/lib/icons/PlusOutlined";
 import MinusCircleOutlined from "@ant-design/icons/lib/icons/MinusCircleOutlined";
+import './css/OperatorDetails.css'
 
 const tailLayout = {
-    wrapperCol: { offset: 16, span: 16 },
+    wrapperCol: { offset: 19, span: 5 },
 };
 
 const layout = {
     labelCol: { span: 6 },
-    wrapperCol: { span: 17 },
+    wrapperCol: { span: 22 },
 };
+
+const paramsKey=['method', 'uri', 'path', 'headers', 'body']
 
 
 const onFinishFailed = errorInfo => {
@@ -20,10 +23,12 @@ export class OperatorDetails extends Component {
     constructor(props, context) {
         super(props, context);
         this.state = {
+            typeChanged: false,
             isHttpType: this.props.selectedOperator ? 'HTTP_REQUEST' === this.props.selectedOperator.type : false,
             isDataValidationType: this.props.selectedOperator ?
                 'DATA_VALIDATION' === this.props.selectedOperator.type : false
         }
+        this.typeChanged = false;
     }
 
     onFinish = (values) => {
@@ -48,7 +53,7 @@ export class OperatorDetails extends Component {
     }
 
     onCancel = () => {
-        this.setState({ isHttpType: false, isDataValidationType: false })
+        this.setState({ typeChanged: false, isHttpType: false, isDataValidationType: false })
         this.props.updateState('operatorDetailsVisible', false, "selectedOperator", null)
     }
 
@@ -61,6 +66,7 @@ export class OperatorDetails extends Component {
                 footer={null}
                 onCancel={this.onCancel}
                 destroyOnClose={true}
+                width={1200}
             >
                 <Form
                     preserve={false}
@@ -84,24 +90,24 @@ export class OperatorDetails extends Component {
                         initialValue={this.props.selectedOperator ? this.props.selectedOperator.type : null}
                     >
                         <Select onChange={(value) => {
-                            this.setState({ isHttpType: 'HTTP_REQUEST' === value, isDataValidationType: 'DATA_VALIDATION' === value })
+                            this.setState({ typeChanged:true, isHttpType: 'HTTP_REQUEST' === value, isDataValidationType: 'DATA_VALIDATION' === value })
                         }}>
                             <Select.Option value="HTTP_REQUEST">HTTP_REQUEST</Select.Option>
                             <Select.Option value="DATA_VALIDATION">DATA_VALIDATION</Select.Option>
                         </Select>
                     </Form.Item>
-                    {(this.props.selectedOperator && 'HTTP_REQUEST' === this.props.selectedOperator.type) || this.state.isHttpType ?
+                    {this.state.isHttpType || (this.props.selectedOperator && 'HTTP_REQUEST' === this.props.selectedOperator.type && !this.state.typeChanged) ?
                         <HttpParameters
                             params={this.props.selectedOperator ? this.props.selectedOperator.params : null} /> : ''}
-                    {(this.props.selectedOperator && 'DATA_VALIDATION' === this.props.selectedOperator.type) || this.state.isDataValidationType ?
-                        <DataValidation
+                    {this.state.isDataValidationType || (this.props.selectedOperator && 'DATA_VALIDATION' === this.props.selectedOperator.type && !this.state.typeChanged) ? 
+                            <DataValidation
                             params={this.props.selectedOperator ? this.props.selectedOperator.params : null} /> : ''}
                     <Form.Item {...tailLayout}>
                         <div>
-                            <Button style={{ "marginRight": 8 }}
+                            <Button style={{ "marginRight": 8, width: '100px' }}
                                 onClick={this.onCancel}>Cancel
                             </Button>
-                            <Button type="primary" htmlType="submit">
+                            <Button style={{width: '100px' }} type="primary" htmlType="submit">
                                 Save
                             </Button>
                         </div>
@@ -179,10 +185,16 @@ class DataValidation extends Component {
         super(props, context);
     }
 
+    notInKeys(name) {
+        let result = false;
+        paramsKey.forEach(k => {if (k === name) {result = true;}})
+        return result;
+    }
+
     render() {
         let dvInitialValue=[]
         if (this.props.params) {
-            Object.keys(this.props.params).map(key => {
+            Object.keys(this.props.params).filter(key => !this.notInKeys(key)).map(key => {
             dvInitialValue = dvInitialValue.concat(
                 {
                     variable: key,
@@ -196,34 +208,36 @@ class DataValidation extends Component {
                     <div>
                         <Row>
                             <Col span={6}>
-                                &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Conditions:
+                                <span style={{paddingRight: 9, float: 'right'}}>Conditions:</span>
                             </Col>
-                            <Col span={18}>
+                            <Col className='dv-condition-form' span={18}>
                                 {fields.map(field => (
-                                    <Space key={field.key} direction="vertical" align="baseline" style={{display: "block"}}>
-                                        <Form.Item
-                                            label="variable"
-                                            {...field}
-                                            name={[field.name, 'variable']}
-                                            fieldKey={[field.fieldKey, 'variable']}
-                                            rules={[{ required: true, message: 'Missing variable name' }]}
-                                            style={{marginBottom: 0}}
-                                        >
-                                            <Input placeholder="Variable name to be check" />
-                                        </Form.Item>
+                                    <div key={field.key} style={{display: 'flex'}}>
+                                        <Space style={{ width: '90%', display: 'flex', marginBottom: 8 }} align="baseline">
+                                            <Form.Item
+                                                label="variable"
+                                                {...field}
+                                                name={[field.name, 'variable']}
+                                                fieldKey={[field.fieldKey, 'variable']}
+                                                rules={[{ required: true, message: 'Missing variable name' }]}
+                                                style={{marginBottom: 0, width: '100%'}}
+                                            >
+                                                <Input placeholder="Variable name to be check" />
+                                            </Form.Item>
+                                            <Form.Item
+                                                label="expression"
+                                                {...field}
+                                                name={[field.name, 'condition']}
+                                                fieldKey={[field.fieldKey, 'condition']}
+                                                rules={[{ required: true, message: 'Missing check condition' }]}
+                                            >
+                                                <Input placeholder="Check Condition" />
+                                            </Form.Item>
+                                        </Space>
                                         <MinusCircleOutlined onClick={() => remove(field.name)} />
-                                        <Form.Item
-                                            label="expression"
-                                            {...field}
-                                            name={[field.name, 'condition']}
-                                            fieldKey={[field.fieldKey, 'condition']}
-                                            rules={[{ required: true, message: 'Missing check condition' }]}
-                                        >
-                                            <Input placeholder="Check Condition" />
-                                        </Form.Item>
-                                    </Space>
+                                    </div>
                                 ))}
-                                <Form.Item>
+                                <Form.Item style={{width: '100%'}}>
                                     <Button type="dashed" onClick={() => add()} block icon={<PlusOutlined />}>
                                         Add Check Condition
                                     </Button>
