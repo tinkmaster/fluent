@@ -47,8 +47,8 @@ function drawNextNodes(data, parentId, id, pathLength, branchesNum, res, nodesHa
                     id: parentId + '->' + id,
                     source: parentId + '',
                     target: id + '',
-                    sourceHandler: null,
-                    targetHandler: null,
+                    sourceHandler: undefined,
+                    targetHandler: undefined,
                     arrowHeadType: 'arrowclosed',
                     type: 'custom',
                     animated: true

@@ -1,8 +1,8 @@
 import React from "react";
-
+import './css/PipelineGraph.css'
 import {nodeTypes} from "./DataFlowNodeTypes";
 import ReactFlow, {addEdge, Controls, isEdge, isNode, MiniMap, removeElements, useZoomPanHelper} from "react-flow-renderer";
-import {Button, Col, Row, Select, Spin} from "antd";
+import {Button, Col, Row, Select, Spin, PageHeader} from "antd";
 import {edgeTypes} from "./DataFlowEdgeType";
 const { Option } = Select;
 
@@ -61,7 +61,6 @@ export class PipelineGraph extends React.Component {
     onLoad = (reactFlowInstance) => {
         if (!this.graphInstance) {
             this.graphInstance = reactFlowInstance;
-            this.graphInstance.fitView()
         }
         if (this.props.selectedPipeline) {
             this.lastSelectedPipelineName = this.props.selectedPipeline.name
@@ -77,79 +76,64 @@ export class PipelineGraph extends React.Component {
     }
 
     render() {
-        if (this.lastSelectedPipelineName && this.lastSelectedPipelineName !== this.props.selectedPipeline.name) {
-            this.graphInstance.fitView()
-            this.lastSelectedPipelineName = this.props.selectedPipeline.name
-        } else {
-            this.lastSelectedPipelineName = this.props.selectedPipeline.name
-        }
         return (
-            <ReactFlow
-                onLoad={this.onLoad}
-                elements={this.props.pipelineData}
-                nodeTypes={nodeTypes}
-                edgeTypes={edgeTypes}
-                nodesDraggable={true}
-                nodesConnectable={true}
-                onElementClick={this.onElementClick}
-                onConnect={this.onConnect}
-                onElementsRemove={this.onRemove}
-            >
-                <MiniMap
-                    nodeColor={(node) => {
-                        switch (node.type) {
-                            case 'input':
-                                return 'red';
-                            case 'default':
-                                return '#00ff00';
-                            case 'output':
-                                return 'rgb(0,0,255)';
-                            default:
-                                return '#eee';
-                        }
-                    }}
-                />
-                <div
-                    style={{
-                        position: 'absolute',
-                        left: 32,
-                        top: 32,
-                        zIndex: 4,
-                        textTransform: 'none'
-                    }}>
-                    <Row gutter={26}>
-                        <Col>
-                            <Button type="primary" shape="round" onClick={this.saveDiagram}>Save
-                                Diagram</Button>
-                        </Col>
-                        <Col>
-                            <Button type="primary" shape="round" danger
-                                    onClick={this.runDiagram}>
-                                Run Pipeline
-                            </Button>
-                        </Col>
-                        <Col>
-                            <Row>
-                                <h2>Env:</h2>
-                                {this.props.envSelectLoading?
-                                <Spin style={{margin: 'auto', paddingLeft: 36 }}/> : 
-                                    <Select 
-                                        allowClear
-                                        defaultValue={this.props.pipelineSelectedEnv ? this.props.pipelineSelectedEnv : this.props.selectedPipeline.environment}
-                                        placeholder="Choose Env"
-                                        style={{ width: 180, marginLeft: 8 }}
-                                        onChange={this.handleChange}
-                                        >
-                                        {this.props.envsList ? 
-                                            this.props.envsList.map(opt => (<Option key={opt} value={opt}>{opt}</Option>)): 
+            <div style={{height:'100%'}}>
+                <div className='pipeline-graph-page-header'>
+                    <PageHeader
+                        title="Pipeline Graph"
+                        extra={[
+                            <div style={{display: 'flex'}}>
+                                <h3 style={{paddingLeft: '8px', margin: 'auto'}}>Env:</h3>
+                                 {this.props.envSelectLoading?
+                                    <div style={{marginLeft: '8px', width: 180}}>
+                                        <Spin style={{margin: 'auto', paddingLeft: 64 }} loading={true}/></div> : 
+                                     <Select 
+                                         allowClear
+                                         defaultValue={this.props.pipelineSelectedEnv ? this.props.pipelineSelectedEnv : this.props.selectedPipeline.environment}
+                                         placeholder="Choose Env"
+                                         style={{ width: 180, marginLeft: 8 }}
+                                         onChange={this.handleChange}
+                                         >
+                                         {this.props.envsList ? 
+                                             this.props.envsList.map(opt => (<Option key={opt} value={opt}>{opt}</Option>)): 
                                         ''}
                                     </Select>}
-                            </Row>
-                        </Col>
-                    </Row>
+                                <Button style={{marginLeft: '8px'}} key="save" type="primary" onClick={this.saveDiagram}>Save</Button>
+                                <Button style={{marginLeft: '8px'}} key="run" danger onClick={this.runDiagram}>Run</Button>
+                            </div>
+                        ]}>
+                    </PageHeader>
                 </div>
-                <Controls/>
-            </ReactFlow>
+                <div style={{height:'100%', width: '100%'}}>
+                    <ReactFlow
+                        elements={this.props.pipelineData}
+                        nodeTypes={nodeTypes}
+                        edgeTypes={edgeTypes}
+                        nodesDraggable={true}
+                        nodesConnectable={true}
+                        onElementClick={this.onElementClick}
+                        onConnect={this.onConnect}
+                        onElementsRemove={this.onRemove}
+                        defaultZoom={0.5}
+                >
+                        <MiniMap
+                            nodeColor={(node) => {
+                                switch (node.type) {
+                                    case 'input':
+                                        return 'red';
+                                    case 'default':
+                                        return '#00ff00';
+                                    case 'output':
+                                        return 'rgb(0,0,255)';
+                                    default:
+                                        return '#eee';
+                                }
+                            }}
+                        />
+                        <Controls/>
+                    </ReactFlow>
+                </div>
+            </div>
         )
     }
 }
