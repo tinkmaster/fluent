@@ -1,22 +1,27 @@
 import React from "react";
 
 import {nodeTypes} from "./DataFlowNodeTypes";
-import ReactFlow, {addEdge, Controls, isEdge, isNode, MiniMap, removeElements} from "react-flow-renderer";
+import ReactFlow, {addEdge, Controls, isEdge, isNode, MiniMap, removeElements, useZoomPanHelper} from "react-flow-renderer";
 import {Button, Col, Row, Select, Spin} from "antd";
 import {edgeTypes} from "./DataFlowEdgeType";
 const { Option } = Select;
 
+
 export class PipelineGraph extends React.Component {
     constructor(props, context) {
         super(props, context);
+        this.graphInstance = undefined
+        this.lastSelectedPipelineName = undefined
     }
-
+    
     onConnect = (params) => {
         params['type'] = 'custom'
         params['arrowHeadType'] = 'arrowclosed'
         this.props.updateGraph(addEdge(params, this.props.pipelineData))
     }
     onRemove = (params) => {
+        params.forEach(v => v['id'] = v['id'] + '');
+        params.forEach( v=> {if (v['source']) {v['id'] = v['source'] + '->' + v['target']}})
         this.props.updateGraph(removeElements(params, this.props.pipelineData))
     }
 
@@ -53,8 +58,17 @@ export class PipelineGraph extends React.Component {
         this.props.runPipeline(Object.assign({}, obj));
     }
 
+    onLoad = (reactFlowInstance) => {
+        if (!this.graphInstance) {
+            this.graphInstance = reactFlowInstance;
+            this.graphInstance.fitView()
+        }
+        if (this.props.selectedPipeline) {
+            this.lastSelectedPipelineName = this.props.selectedPipeline.name
+        }
+    };
+
     handleChange = (value) => {
-        console.log(value)
         if(value === undefined) {
             this.props.updatePipelinePageState('pipelineSelectedEnv', '')
         } else {
@@ -63,8 +77,15 @@ export class PipelineGraph extends React.Component {
     }
 
     render() {
+        if (this.lastSelectedPipelineName && this.lastSelectedPipelineName !== this.props.selectedPipeline.name) {
+            this.graphInstance.fitView()
+            this.lastSelectedPipelineName = this.props.selectedPipeline.name
+        } else {
+            this.lastSelectedPipelineName = this.props.selectedPipeline.name
+        }
         return (
             <ReactFlow
+                onLoad={this.onLoad}
                 elements={this.props.pipelineData}
                 nodeTypes={nodeTypes}
                 edgeTypes={edgeTypes}
@@ -111,14 +132,13 @@ export class PipelineGraph extends React.Component {
                             <Row>
                                 <h2>Env:</h2>
                                 {this.props.envSelectLoading?
-                                <Spin style={{margin: 'auto', paddingLeft: 36 }} loading={true}/> : 
+                                <Spin style={{margin: 'auto', paddingLeft: 36 }}/> : 
                                     <Select 
                                         allowClear
                                         defaultValue={this.props.pipelineSelectedEnv ? this.props.pipelineSelectedEnv : this.props.selectedPipeline.environment}
                                         placeholder="Choose Env"
                                         style={{ width: 180, marginLeft: 8 }}
                                         onChange={this.handleChange}
-                                        
                                         >
                                         {this.props.envsList ? 
                                             this.props.envsList.map(opt => (<Option key={opt} value={opt}>{opt}</Option>)): 

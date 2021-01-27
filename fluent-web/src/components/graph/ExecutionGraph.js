@@ -9,11 +9,28 @@ export class ExecutionGraph extends React.Component {
 
     constructor(props, context) {
         super(props, context);
+        this.graphInstance = undefined
+        this.lastselectedHistoryName = undefined
     }
 
+    onLoad = (reactFlowInstance) => {
+        if (!this.graphInstance) {
+            this.graphInstance = reactFlowInstance;
+            this.graphInstance.fitView()
+        }
+        if (this.props.selectedHistory) {
+            this.lastselectedHistoryName = this.props.selectedHistory.name
+        }
+    };
+
     render() {
+        if (this.lastselectedHistoryName && this.lastselectedHistoryName !== this.props.selectedHistory.name) {
+            this.graphInstance.fitView()
+            this.lastselectedHistoryName = this.props.selectedHistory.name
+        }
         return (
             <ReactFlow
+                onLoad={this.onLoad}
                 elements={this.props.executionData}
                 nodesConnectable={false}
                 nodeTypes={nodeTypes}
