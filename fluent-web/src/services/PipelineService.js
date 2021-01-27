@@ -31,13 +31,13 @@ export function selectPipeline(name) {
         get(GET_PIPELINE_ADDRESS.replace("{}", name)).then(
             response => {
                 if (response.data.code === 200) {
+                    dispatch(editPipelineAction(response.data.data));
                     if (response.data.data && response.data.data.operators) {
                         const res = drawPipelineGraph(response.data.data)
                         dispatch(updatePipelineGraph(res))
                     } else {
                         dispatch(updatePipelineGraph([]))
                     }
-                    dispatch(editPipelineAction(response.data.data));
                 }
             }
         ).then(
@@ -67,6 +67,7 @@ export function updatePipeline(name, values) {
         post(POST_PIPELINE_ADDRESS, values).then(
             response => {
                 if (response.data.code === 200) {
+                    dispatch(editPipelineAction(response.data.data))
                     message.success("Update pipeline successfully.")
                 }
             }

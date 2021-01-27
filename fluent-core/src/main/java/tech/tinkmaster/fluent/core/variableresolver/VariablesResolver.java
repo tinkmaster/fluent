@@ -72,6 +72,10 @@ public class VariablesResolver {
 
   private String resolvePlacement(
       String varName, ExecutionDiagram diagram, VariableService variableService) {
+    if (diagram.getParameters() != null && diagram.getParameters().get(varName) != null) {
+      return this.resolve(diagram, diagram.getParameters().get(varName), variableService);
+    }
+
     String[] keys = varName.split("\\.");
 
     String[] remainingKeys = Arrays.copyOfRange(keys, 1, keys.length);

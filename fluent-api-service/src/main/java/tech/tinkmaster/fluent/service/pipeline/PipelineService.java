@@ -40,7 +40,12 @@ public class PipelineService {
                 cons.add(Pair.of(Integer.valueOf(arr[0]), Integer.valueOf(arr[1])));
               });
       ExecutionDiagram executionDiagram =
-          new ExecutionDiagram(pipeline.getName(), operators, cons, pipeline.getEnvironment());
+          new ExecutionDiagram(
+              pipeline.getName(),
+              operators,
+              cons,
+              pipeline.getEnvironment(),
+              pipeline.getParameters());
       if (executionDiagram.checkIfHasCircle()) {
         throw new FluentPipelineCircleDetectedException(
             "Find circle in pipeline, please check your pipeline graph.");

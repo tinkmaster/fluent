@@ -81,7 +81,12 @@ public class ExecutionController {
             });
     System.out.println(pipeline.getEnvironment());
     ExecutionDiagram diagram =
-        new ExecutionDiagram(pipeline.getName(), operatorMap, cons, pipeline.getEnvironment());
+        new ExecutionDiagram(
+            pipeline.getName(),
+            operatorMap,
+            cons,
+            pipeline.getEnvironment(),
+            pipeline.getParameters());
     diagram.setStatus(ExecutionStatus.WAITING_TO_BE_SCHEDULED);
     this.service.updateOrCreate(diagram);
     return ResponseEntity.ok(diagram);
