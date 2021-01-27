@@ -20,6 +20,7 @@ public class ExecutionDiagram {
   private Date createdTime;
   private Map<String, String> results;
   private String environment;
+  private Map<String, String> parameters;
 
   public ExecutionDiagram() {
     this.results = new HashMap<>();
@@ -36,7 +37,8 @@ public class ExecutionDiagram {
       String pipelineName,
       Map<Integer, Operator> operators,
       List<Pair<Integer, Integer>> connections,
-      String environment) {
+      String environment,
+      Map<String, String> parameters) {
     HashMap<Integer, ExecutionDiagramNode> nodes = new HashMap<>();
     operators.forEach(
         (k, v) -> {
@@ -65,6 +67,7 @@ public class ExecutionDiagram {
     this.status = ExecutionStatus.CREATED;
     this.createdTime = new Date();
     this.environment = environment;
+    this.parameters = parameters;
   }
 
   public Integer findNextNodeToRun() {

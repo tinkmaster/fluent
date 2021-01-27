@@ -6,3 +6,7 @@
 .pipeline-graph-page-header .ant-page-header {
     padding-top: 4px;
 }
+
+.pipeline-parameter-modal .ant-space-item {
+    width: 100%;
+}

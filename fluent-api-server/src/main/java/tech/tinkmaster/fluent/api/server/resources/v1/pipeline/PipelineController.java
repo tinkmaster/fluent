@@ -1,10 +1,12 @@
 package tech.tinkmaster.fluent.api.server.resources.v1.pipeline;
 
 import java.io.IOException;
+import java.util.Arrays;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
 import tech.tinkmaster.fluent.api.server.responses.ResponseEntity;
 import tech.tinkmaster.fluent.common.entity.pipeline.Pipeline;
+import tech.tinkmaster.fluent.common.exceptions.FluentEntityIllegalException;
 import tech.tinkmaster.fluent.common.exceptions.FluentNotFoundException;
 import tech.tinkmaster.fluent.service.pipeline.PipelineService;
 
@@ -31,8 +33,26 @@ public class PipelineController {
 
   @PostMapping(path = "")
   public ResponseEntity updateOrCreate(@RequestBody Pipeline pipeline) throws IOException {
-    this.service.updateOrCreate(pipeline);
-    return ResponseEntity.ok(null);
+    String[] forbiddenKeys =
+        new String[] {"env.", "pipeline.", "currentEnv.", "operators", "global.", "secret."};
+    // check pipeline parameters formation
+    if (pipeline.getParameters() != null && pipeline.getParameters().size() > 0) {
+      if (pipeline
+          .getParameters()
+          .keySet()
+          .stream()
+          .allMatch(
+              p ->
+                  p.matches("[a-z0-9A-Z]+")
+                      && Arrays.stream(forbiddenKeys).noneMatch(p::startsWith))) {
+        this.service.updateOrCreate(pipeline);
+      } else {
+        throw new FluentEntityIllegalException(
+            "Illegal pipeline parameters, only letters and number are allowed.");
+      }
+    }
+
+    return ResponseEntity.ok(pipeline);
   }
 
   @DeleteMapping(path = "{name}")

@@ -55,6 +55,7 @@ export class ExecutionGraph extends React.Component {
                             this.props.updatePipelinePageState("selectedHistoryNode", element.id)}
                     >
                         <MiniMap
+                            style={{marginBottom: '44px'}}
                             nodeColor={(node) => {
                                 switch (node.type) {
                                     case 'input':

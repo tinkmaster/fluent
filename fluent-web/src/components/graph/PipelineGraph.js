@@ -1,11 +1,20 @@
-import React from "react";
+import React, { Component } from "react";
 import './css/PipelineGraph.css'
 import {nodeTypes} from "./DataFlowNodeTypes";
-import ReactFlow, {addEdge, Controls, isEdge, isNode, MiniMap, removeElements, useZoomPanHelper} from "react-flow-renderer";
-import {Button, Col, Row, Select, Spin, PageHeader} from "antd";
+import ReactFlow, {addEdge, Controls, isEdge, isNode, MiniMap, removeElements} from "react-flow-renderer";
+import {Button, Form, Space, Input, Select, Spin, PageHeader} from "antd";
 import {edgeTypes} from "./DataFlowEdgeType";
+import Modal from "antd/lib/modal/Modal";
+import { MinusCircleOutlined, PlusCircleTwoTone } from "@ant-design/icons";
 const { Option } = Select;
+const tailLayout = {
+    wrapperCol: { offset: 19, span: 5 },
+};
 
+const layout = {
+    labelCol: { span: 6 },
+    wrapperCol: { span: 22 },
+};
 
 export class PipelineGraph extends React.Component {
     constructor(props, context) {
@@ -30,7 +39,8 @@ export class PipelineGraph extends React.Component {
             name: this.props.selectedPipeline.name,
             operators: {},
             connections: [],
-            environment: this.props.pipelineSelectedEnv ? this.props.pipelineSelectedEnv : this.props.selectedPipeline.environment
+            environment: this.props.pipelineSelectedEnv ? this.props.pipelineSelectedEnv : this.props.selectedPipeline.environment,
+            parameters: this.props.selectedPipeline.parameters
         }
         if (this.props.pipelineSelectedEnv === '') {
             obj['environment'] = null
@@ -49,7 +59,8 @@ export class PipelineGraph extends React.Component {
             pipelineName: this.props.selectedPipeline.name,
             operators: {},
             connections: [],
-            environment: this.props.pipelineSelectedEnv ? (this.props.pipelineSelectedEnv === '' ? null : this.props.pipelineSelectedEnv) : this.props.selectedPipeline.environment
+            environment: this.props.pipelineSelectedEnv ? (this.props.pipelineSelectedEnv === '' ? null : this.props.pipelineSelectedEnv) : this.props.selectedPipeline.environment,
+            parameters: this.props.selectedPipeline.parameters
         }
         this.props.pipelineData.filter(v => isNode(v)).map(v => {
             obj.operators[v['id']] = v.data.name
@@ -86,10 +97,11 @@ export class PipelineGraph extends React.Component {
                                 <h3 style={{paddingLeft: '8px', margin: 'auto'}}>Env:</h3>
                                  {this.props.envSelectLoading?
                                     <div style={{marginLeft: '8px', width: 180}}>
-                                        <Spin style={{margin: 'auto', paddingLeft: 64 }} loading={true}/></div> : 
-                                     <Select 
+                                        <Spin style={{margin: 'auto', paddingLeft: 64, paddingTop: 8 }}/>
+                                    </div> : 
+                                    <Select 
                                          allowClear
-                                         defaultValue={this.props.pipelineSelectedEnv ? this.props.pipelineSelectedEnv : this.props.selectedPipeline.environment}
+                                         defaultValue={this.props.selectedPipeline.environment}
                                          placeholder="Choose Env"
                                          style={{ width: 180, marginLeft: 8 }}
                                          onChange={this.handleChange}
@@ -98,6 +110,8 @@ export class PipelineGraph extends React.Component {
                                              this.props.envsList.map(opt => (<Option key={opt} value={opt}>{opt}</Option>)): 
                                         ''}
                                     </Select>}
+                                <Button style={{marginLeft: '8px'}} key="params" type="primary" 
+                                    onClick={() => this.props.updatePipelinePageState('pipelineParamsFormVisible', true)}>Parameters</Button>
                                 <Button style={{marginLeft: '8px'}} key="save" type="primary" onClick={this.saveDiagram}>Save</Button>
                                 <Button style={{marginLeft: '8px'}} key="run" danger onClick={this.runDiagram}>Run</Button>
                             </div>
@@ -117,6 +131,7 @@ export class PipelineGraph extends React.Component {
                         defaultZoom={0.5}
                 >
                         <MiniMap
+                            style={{marginBottom: '44px'}}
                             nodeColor={(node) => {
                                 switch (node.type) {
                                     case 'input':
@@ -133,7 +148,113 @@ export class PipelineGraph extends React.Component {
                         <Controls/>
                     </ReactFlow>
                 </div>
+                <PipelineParametersFormModal
+                    pipelineParamsFormVisible={this.props.pipelineParamsFormVisible}
+                    updateState={this.props.updatePipelinePageState}
+                    updatePipeline={this.props.updatePipeline}
+                    selectedPipeline={this.props.selectedPipeline}
+                />
             </div>
+        )
+    }
+}
+
+export class PipelineParametersFormModal extends Component{
+
+    onCancel = () => {
+        this.props.updateState('pipelineParamsFormVisible', false)
+    }
+
+    onFinish = (values) => {
+        let obj = Object.assign({}, this.props.selectedPipeline)
+        obj['parameters'] = {}
+        values['pipelineParams'].forEach(v => {
+            obj['parameters'][v['varName'].trim()] = v['value']
+        })
+        this.props.updatePipeline(this.props.selectedPipeline.name, Object.assign({}, obj))
+        this.props.updateState('pipelineParamsFormVisible', false)
+    }
+
+    onFinishFailed = errorInfo => {
+    };
+
+    render() {
+        let pipelineParams = []
+        if (this.props.selectedPipeline.parameters) {
+            Object.keys(this.props.selectedPipeline.parameters).forEach(v => {
+                pipelineParams = pipelineParams.concat({
+                    varName: v,
+                    value: this.props.selectedPipeline.parameters[v]
+                })
+            })
+        }
+
+        return (
+            <Modal
+                title="Pipeline Parameters"
+                visible={this.props.pipelineParamsFormVisible}
+                footer={null}
+                onCancel={this.onCancel}
+                destroyOnClose={true}
+                width={800}
+                className='pipeline-parameter-modal'
+            >
+                <Form
+                    preserve={false}
+                    {...layout}
+                    name="basic"
+                    onFinish={this.onFinish}
+                    onFinishFailed={this.onFinishFailed}
+                >
+                    <Form.List name="pipelineParams" initialValue={pipelineParams}>
+                        {(fields, { add, remove }) => (
+                            <div>
+                            {fields.map(field => (
+                                <div key={field.key} style={{display: 'flex'}}>
+                                    <Space style={{ width: '90%', display: 'flex', marginBottom: 8 }} align="baseline">
+                                        <Form.Item
+                                            label="varName"
+                                            {...field}
+                                            name={[field.name, 'varName']}
+                                            fieldKey={[field.fieldKey, 'varName']}
+                                            rules={[{ required: true, message: 'Missing variable name' }]}
+                                            style={{marginBottom: 0, width: '100%'}}
+                                        >
+                                            <Input placeholder="Variable name" />
+                                        </Form.Item>
+                                        <Form.Item
+                                            label="value"
+                                            {...field}
+                                            name={[field.name, 'value']}
+                                            fieldKey={[field.fieldKey, 'value']}
+                                            rules={[{ required: true, message: 'Missing variable value' }]}
+                                        >
+                                            <Input placeholder="Variable value" />
+                                        </Form.Item>
+                                    </Space>
+                                    <MinusCircleOutlined style={{marginLeft: '16px', marginTop: '8px'}}onClick={() => remove(field.name)} />
+                                </div>
+                            ))}
+                            <Form.Item style={{width: '100%'}}>
+                                <Button type="dashed" onClick={() => add()} block icon={<PlusCircleTwoTone />}>
+                                    Add Check Condition
+                                </Button>
+                            </Form.Item>
+                            </div>
+                        )}
+                    </Form.List>
+                    <Form.Item {...tailLayout}>
+                        <div style={{display: 'flex'}}>
+                            <Button style={{ "marginRight": 8, width: '100px' }}
+                                onClick={this.onCancel}>Cancel
+                            </Button>
+                            <Button style={{width: '100px' }} type="primary" htmlType="submit">
+                                Save
+                            </Button>
+                        </div>
+                    </Form.Item>
+                </Form>
+            </Modal>
         )
     }
 }

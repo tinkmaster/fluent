@@ -168,6 +168,7 @@ export class PipelinesPage extends React.Component {
                                 />
                                 :
                                 <PipelineGraph
+                                    pipelineParamsFormVisible={this.props.pipelineParamsFormVisible}
                                     envsList={this.props.envsList}
                                     pipelineSelectedEnv={this.props.pipelineSelectedEnv}
                                     envSelectLoading={this.props.envSelectLoading}

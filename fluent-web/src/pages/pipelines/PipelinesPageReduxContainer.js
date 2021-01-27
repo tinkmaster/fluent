@@ -23,6 +23,8 @@ const mapStateToProps = (state) => {
         pipelines: state.PipelinePageReducer.pipelines,
         selectedPipeline: state.PipelinePageReducer.selectedPipeline,
         pipelineData: state.PipelinePageReducer.pipelineData,
+        pipelineParamsFormVisible: state.PipelinePageReducer.pipelineParamsFormVisible,
+
         executionDiagramList: state.PipelinePageReducer.executionDiagramList,
         selectedHistory: state.PipelinePageReducer.selectedHistory,
         executionData: state.PipelinePageReducer.executionData,
