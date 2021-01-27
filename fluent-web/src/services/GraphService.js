@@ -20,7 +20,7 @@ function drawNextNodes(data, parentId, id, pathLength, branchesNum, res, nodesHa
     if (!nodesHaveDrawn[id]) {
         let obj = {}
         Object.assign(obj, {
-            id: id,
+            id: '' + id,
             data: {
                 label: id + '-' + node.operator.name,
                 name: node.operator.name,
@@ -45,8 +45,8 @@ function drawNextNodes(data, parentId, id, pathLength, branchesNum, res, nodesHa
             res.push(
                 {
                     id: parentId + '->' + id,
-                    source: parentId,
-                    target: id,
+                    source: parentId + '',
+                    target: id + '',
                     sourceHandler: null,
                     targetHandler: null,
                     arrowHeadType: 'arrowclosed',

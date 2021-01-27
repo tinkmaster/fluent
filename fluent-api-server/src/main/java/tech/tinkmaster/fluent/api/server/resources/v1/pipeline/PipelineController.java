@@ -30,8 +30,8 @@ public class PipelineController {
   }
 
   @PostMapping(path = "")
-  public ResponseEntity updateOrCreate(@RequestBody Pipeline operator) throws IOException {
-    this.service.updateOrCreate(operator);
+  public ResponseEntity updateOrCreate(@RequestBody Pipeline pipeline) throws IOException {
+    this.service.updateOrCreate(pipeline);
     return ResponseEntity.ok(null);
   }
 
