@@ -1,0 +1,8 @@
+.pipeline-graph-page-header {
+    height: 48px;
+    border-bottom: 1px dashed #e1e1e1;
+}
+
+.pipeline-graph-page-header .ant-page-header {
+    padding-top: 4px;
+}
