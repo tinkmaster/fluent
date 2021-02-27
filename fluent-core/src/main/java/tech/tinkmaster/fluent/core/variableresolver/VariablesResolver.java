@@ -3,20 +3,23 @@ package tech.tinkmaster.fluent.core.variableresolver;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
-import java.io.IOException;
-import java.util.*;
-import java.util.regex.Matcher;
-import java.util.regex.Pattern;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import tech.tinkmaster.fluent.common.FluentObjectMappers;
-import tech.tinkmaster.fluent.common.entity.execution.ExecutionDiagram;
+import tech.tinkmaster.fluent.common.entity.execution.Execution;
+import tech.tinkmaster.fluent.common.entity.execution.ExecutionGraph;
+import tech.tinkmaster.fluent.common.entity.execution.ExecutionUtils;
 import tech.tinkmaster.fluent.common.entity.operator.Operator;
 import tech.tinkmaster.fluent.common.entity.variable.Environment;
 import tech.tinkmaster.fluent.common.exceptions.FluentSecretDecryptException;
 import tech.tinkmaster.fluent.core.failure.ExecutionFailuresFactory;
 import tech.tinkmaster.fluent.core.variableresolver.functions.FluentVariableResolveFunctionCenter;
 import tech.tinkmaster.fluent.service.variable.VariableService;
+
+import java.io.IOException;
+import java.util.*;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
 /** This class is used for resolving the variables in the operators parameters */
 public class VariablesResolver {
@@ -32,11 +35,11 @@ public class VariablesResolver {
    * Right now, only one whole parameter name or one function is allowed, but you can put multiple
    * variable reference in the function's parameters
    *
-   * @param diagram
+   * @param execution
    * @param content
    * @return
    */
-  public String resolve(ExecutionDiagram diagram, String content, VariableService variableService) {
+  public String resolve(Execution execution, String content, VariableService variableService) {
     // find all the level-top variable replacement
     List<String> variables = findPotentialVariables(content);
     Map<String, String> maps = new HashMap<>();
@@ -54,10 +57,10 @@ public class VariablesResolver {
             maps.put(
                 var,
                 FluentVariableResolveFunctionCenter.resolve(
-                    diagram, functionName, variableContent, variableService));
+                    execution, functionName, variableContent, variableService));
           } else if (matcher.find()) {
             String placement = matcher.group(1);
-            maps.put(var, this.resolvePlacement(placement, diagram, variableService));
+            maps.put(var, this.resolvePlacement(placement, execution, variableService));
           }
         });
 
@@ -71,9 +74,9 @@ public class VariablesResolver {
   }
 
   private String resolvePlacement(
-      String varName, ExecutionDiagram diagram, VariableService variableService) {
-    if (diagram.getParameters() != null && diagram.getParameters().get(varName) != null) {
-      return this.resolve(diagram, diagram.getParameters().get(varName), variableService);
+      String varName, Execution execution, VariableService variableService) {
+    if (execution.getParameters() != null && execution.getParameters().get(varName) != null) {
+      return this.resolve(execution, execution.getParameters().get(varName), variableService);
     }
 
     String[] keys = varName.split("\\.");
@@ -83,15 +86,17 @@ public class VariablesResolver {
     // only check pipeline and env here, cause the operators have different formation
     switch (keys[0]) {
       case "pipeline":
-        return this.getPipelineValue(varName, keys, remainingKeys, diagram);
+        return this.getPipelineValue(varName, keys, remainingKeys, execution);
       case "env":
         return this.getEnvValue(varName, remainingKeys, variableService);
       case "currentEnv":
-        return this.getCurrentEnvValue(varName, remainingKeys, variableService, diagram);
+        return this.getCurrentEnvValue(varName, remainingKeys, variableService, execution);
       case "global":
         return this.getGlobalValue(varName, remainingKeys, variableService);
       case "secret":
         return this.getSecretValue(varName, remainingKeys, variableService);
+      case "currentStage":
+        return execution.getStages().getCurrentExecutionStage();
       default:
         break;
     }
@@ -100,15 +105,20 @@ public class VariablesResolver {
     Matcher matcher = OPERATOR_VARIABLE_NAME_PATTERN.matcher(keys[0]);
     if (matcher.find()) {
       Integer operatorIndex = Integer.valueOf(matcher.group(1));
-
-      return this.getOperatorValue(varName, keys, remainingKeys, operatorIndex, diagram);
+      return this.getOperatorValue(
+          varName,
+          keys,
+          remainingKeys,
+          operatorIndex,
+          execution,
+          ExecutionUtils.getCurrentExecutionGraph(execution));
     }
 
     throw ExecutionFailuresFactory.failToResolveVariable(this.getVariableName(keys));
   }
 
   private String getPipelineValue(
-      String varName, String[] keys, String[] remainingKeys, ExecutionDiagram diagram) {
+      String varName, String[] keys, String[] remainingKeys, Execution diagram) {
     if (remainingKeys.length == 1) {
       switch (remainingKeys[0]) {
         case "name":
@@ -139,11 +149,14 @@ public class VariablesResolver {
   }
 
   private String getCurrentEnvValue(
-      String wholeName, String[] keys, VariableService variableService, ExecutionDiagram diagram) {
+      String wholeName,
+      String[] remainingKeys,
+      VariableService variableService,
+      Execution diagram) {
     if (diagram.getEnvironment() == null) {
       throw ExecutionFailuresFactory.cantUseCurrentEnvVariable();
     }
-    String name = this.getVariableName(keys);
+    String name = this.getVariableName(remainingKeys);
     try {
       Environment env = variableService.getEnv(diagram.getEnvironment());
       if (env == null) {
@@ -160,8 +173,9 @@ public class VariablesResolver {
     }
   }
 
-  private String getGlobalValue(String wholeName, String[] keys, VariableService variableService) {
-    String name = this.getVariableName(keys);
+  private String getGlobalValue(
+      String wholeName, String[] remainingKeys, VariableService variableService) {
+    String name = this.getVariableName(remainingKeys);
     try {
       String value = variableService.getGlobal().getVariables().get(name);
       if (value == null) {
@@ -174,8 +188,9 @@ public class VariablesResolver {
     }
   }
 
-  private String getSecretValue(String wholeName, String[] keys, VariableService variableService) {
-    String name = this.getVariableName(keys);
+  private String getSecretValue(
+      String wholeName, String[] remainingKeys, VariableService variableService) {
+    String name = this.getVariableName(remainingKeys);
     try {
       String value = variableService.getTranslucentSecret(name).getValue();
       if (value == null) {
@@ -186,6 +201,68 @@ public class VariablesResolver {
       LOG.error("Error occurred while fetching secret variables", e);
       throw ExecutionFailuresFactory.failToResolveVariable(wholeName, e.getMessage());
     }
+  }
+
+  private String getStagesValue(
+      Execution execution,
+      String wholeName,
+      String[] remainingKeys,
+      VariableService variableService) {
+    if (remainingKeys.length == 0) {
+      return execution.getStages().getCurrentExecutionStage();
+    } else {
+      switch (remainingKeys[0]) {
+        case "before":
+          remainingKeys = Arrays.copyOfRange(remainingKeys, 0, remainingKeys.length);
+          return this.getStageValue(
+              execution,
+              execution.getStages().getBefore(),
+              wholeName,
+              remainingKeys,
+              variableService);
+        case "execute":
+          remainingKeys = Arrays.copyOfRange(remainingKeys, 0, remainingKeys.length);
+          return this.getStageValue(
+              execution,
+              execution.getStages().getExecute(),
+              wholeName,
+              remainingKeys,
+              variableService);
+        case "clean":
+          remainingKeys = Arrays.copyOfRange(remainingKeys, 0, remainingKeys.length);
+          return this.getStageValue(
+              execution,
+              execution.getStages().getClean(),
+              wholeName,
+              remainingKeys,
+              variableService);
+        default:
+          throw ExecutionFailuresFactory.cantFindSecretVariable(wholeName);
+      }
+    }
+  }
+
+  private String getStageValue(
+      Execution execution,
+      ExecutionGraph graph,
+      String wholeName,
+      String[] remainingKeys,
+      VariableService variableService) {
+    if (remainingKeys.length != 0) {
+      Matcher matcher = OPERATOR_VARIABLE_NAME_PATTERN.matcher(remainingKeys[0]);
+      if (matcher.find()) {
+        Integer operatorIndex = Integer.valueOf(matcher.group(1));
+        return this.getOperatorValue(
+            wholeName,
+            remainingKeys,
+            remainingKeys,
+            operatorIndex,
+            execution,
+            ExecutionUtils.getCurrentExecutionGraph(execution));
+      }
+    }
+
+    throw ExecutionFailuresFactory.cantFindSecretVariable(wholeName);
   }
 
   /**
@@ -205,11 +282,12 @@ public class VariablesResolver {
       String[] keys,
       String[] remainingKeys,
       Integer operatorIndex,
-      ExecutionDiagram diagram) {
-    if (diagram.getNodes().get(operatorIndex) == null) {
+      Execution execution,
+      ExecutionGraph graph) {
+    if (graph.getNodes().get(operatorIndex) == null) {
       throw ExecutionFailuresFactory.unableToGetResultFromUnknownNode(operatorIndex);
     }
-    Operator op = diagram.getNodes().get(operatorIndex).getOperator();
+    Operator op = graph.getNodes().get(operatorIndex).getOperator();
 
     if (remainingKeys.length == 1) {
       switch (remainingKeys[0]) {
@@ -218,7 +296,7 @@ public class VariablesResolver {
         case "type":
           return op.getType().name();
         case "result":
-          return this.getValueInNodeExecutionResult(operatorIndex, diagram);
+          return this.getValueInNodeExecutionResult(operatorIndex, execution, graph);
         default:
           break;
       }
@@ -234,8 +312,9 @@ public class VariablesResolver {
     throw ExecutionFailuresFactory.failToResolveVariable(varName);
   }
 
-  private String getValueInNodeExecutionResult(Integer operatorIndex, ExecutionDiagram diagram) {
-    String result = diagram.getResults().get(operatorIndex.toString());
+  private String getValueInNodeExecutionResult(
+      Integer operatorIndex, Execution execution, ExecutionGraph graph) {
+    String result = graph.getResults().get(operatorIndex.toString());
     if (result == null) {
       throw ExecutionFailuresFactory.unableToGetResultFromUnexecutedNode(operatorIndex);
     }
@@ -254,7 +333,7 @@ public class VariablesResolver {
     return String.join(".", Arrays.<String>copyOfRange(keys, start, end));
   }
 
-  public static JsonNode translateExecutionDiagram(ExecutionDiagram diagram) {
+  public static JsonNode translateExecutionDiagram(Execution diagram) {
     try {
       return MAPPER.readTree(MAPPER.writeValueAsString(diagram));
     } catch (JsonProcessingException e) {

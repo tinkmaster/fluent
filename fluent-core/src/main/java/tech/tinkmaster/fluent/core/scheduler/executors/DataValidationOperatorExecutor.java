@@ -1,14 +1,15 @@
 package tech.tinkmaster.fluent.core.scheduler.executors;
 
-import java.io.IOException;
-import java.util.HashMap;
-import java.util.Map;
-import tech.tinkmaster.fluent.common.entity.execution.ExecutionDiagram;
+import tech.tinkmaster.fluent.common.entity.execution.Execution;
 import tech.tinkmaster.fluent.common.entity.operator.Operator;
 import tech.tinkmaster.fluent.core.failure.ExecutionFailure;
 import tech.tinkmaster.fluent.core.failure.ExecutionFailuresFactory;
 import tech.tinkmaster.fluent.core.variableresolver.VariablesResolver;
 import tech.tinkmaster.fluent.service.variable.VariableService;
+
+import java.io.IOException;
+import java.util.HashMap;
+import java.util.Map;
 
 /**
  * This class is used for checking if the data is as expected.
@@ -31,11 +32,11 @@ public class DataValidationOperatorExecutor implements OperatorExecutor {
       "These two values equal with each other";
   private static final String SECRET_NOT_EQUAL_RESULT_MESSAGE = "These two values do not equal";
   private Operator operator;
-  private ExecutionDiagram diagram;
+  private Execution diagram;
   private VariableService variableService;
 
   public DataValidationOperatorExecutor(
-      ExecutionDiagram diagram, Operator operator, VariableService variableService) {
+      Execution diagram, Operator operator, VariableService variableService) {
     this.operator = operator;
     this.diagram = diagram;
     this.variableService = variableService;

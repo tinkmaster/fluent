@@ -1,7 +1,7 @@
 package tech.tinkmaster.fluent.core.variableresolver.functions;
 
 import com.fasterxml.jackson.databind.JsonNode;
-import tech.tinkmaster.fluent.common.entity.execution.ExecutionDiagram;
+import tech.tinkmaster.fluent.common.entity.execution.Execution;
 import tech.tinkmaster.fluent.common.util.JsonUtils;
 import tech.tinkmaster.fluent.core.failure.ExecutionFailuresFactory;
 import tech.tinkmaster.fluent.core.variableresolver.VariablesResolver;
@@ -23,8 +23,7 @@ public class ParseJsonFunction implements FluentVariableResolveFunction {
    * @return the value matches the certain path
    */
   @Override
-  public String resolve(
-      ExecutionDiagram diagram, String parameter, VariableService variableService) {
+  public String resolve(Execution diagram, String parameter, VariableService variableService) {
     String path = parameter.substring(parameter.lastIndexOf(",") + 1, parameter.length()).trim();
     String var = parameter.substring(0, parameter.lastIndexOf(",")).trim();
 
