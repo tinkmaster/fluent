@@ -3,6 +3,10 @@ package tech.tinkmaster.fluent.core.variableresolver;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import java.io.IOException;
+import java.util.*;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import tech.tinkmaster.fluent.common.FluentObjectMappers;
@@ -15,11 +19,6 @@ import tech.tinkmaster.fluent.common.exceptions.FluentSecretDecryptException;
 import tech.tinkmaster.fluent.core.failure.ExecutionFailuresFactory;
 import tech.tinkmaster.fluent.core.variableresolver.functions.FluentVariableResolveFunctionCenter;
 import tech.tinkmaster.fluent.service.variable.VariableService;
-
-import java.io.IOException;
-import java.util.*;
-import java.util.regex.Matcher;
-import java.util.regex.Pattern;
 
 /** This class is used for resolving the variables in the operators parameters */
 public class VariablesResolver {
@@ -118,11 +117,11 @@ public class VariablesResolver {
   }
 
   private String getPipelineValue(
-      String varName, String[] keys, String[] remainingKeys, Execution diagram) {
+      String varName, String[] keys, String[] remainingKeys, Execution graph) {
     if (remainingKeys.length == 1) {
       switch (remainingKeys[0]) {
         case "name":
-          return diagram.getPipelineName();
+          return graph.getPipelineName();
         default:
           break;
       }
@@ -149,18 +148,15 @@ public class VariablesResolver {
   }
 
   private String getCurrentEnvValue(
-      String wholeName,
-      String[] remainingKeys,
-      VariableService variableService,
-      Execution diagram) {
-    if (diagram.getEnvironment() == null) {
+      String wholeName, String[] remainingKeys, VariableService variableService, Execution graph) {
+    if (graph.getEnvironment() == null) {
       throw ExecutionFailuresFactory.cantUseCurrentEnvVariable();
     }
     String name = this.getVariableName(remainingKeys);
     try {
-      Environment env = variableService.getEnv(diagram.getEnvironment());
+      Environment env = variableService.getEnv(graph.getEnvironment());
       if (env == null) {
-        throw ExecutionFailuresFactory.cantFindEnv(diagram.getEnvironment());
+        throw ExecutionFailuresFactory.cantFindEnv(graph.getEnvironment());
       }
       String value = env.getVariables().get(name);
       if (value == null) {
@@ -333,9 +329,9 @@ public class VariablesResolver {
     return String.join(".", Arrays.<String>copyOfRange(keys, start, end));
   }
 
-  public static JsonNode translateExecutionDiagram(Execution diagram) {
+  public static JsonNode translateExecutionGraph(Execution graph) {
     try {
-      return MAPPER.readTree(MAPPER.writeValueAsString(diagram));
+      return MAPPER.readTree(MAPPER.writeValueAsString(graph));
     } catch (JsonProcessingException e) {
       LOG.error(
           "Unable to translate execution information to in the process of variable resolve.", e);

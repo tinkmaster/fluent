@@ -1,10 +1,9 @@
 package tech.tinkmaster.fluent.common.entity.pipeline;
 
+import java.util.Map;
 import lombok.Builder;
 import lombok.Value;
 import lombok.With;
-
-import java.util.Map;
 
 @Value
 @With

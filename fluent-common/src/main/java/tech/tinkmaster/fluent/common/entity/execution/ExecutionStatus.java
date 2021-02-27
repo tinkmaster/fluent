@@ -2,8 +2,23 @@ package tech.tinkmaster.fluent.common.entity.execution;
 
 public enum ExecutionStatus {
   CREATED,
-  WAITING_TO_BE_SCHEDULED,
+  SKIPPED,
   RUNNING,
   FAILED,
-  FINISHED
+  CANCELLED,
+  FINISHED;
+
+  public static boolean needToRun(ExecutionStatus status) {
+    if (status == CREATED || status == RUNNING) {
+      return true;
+    }
+    return false;
+  }
+
+  public static boolean noNeedToRun(ExecutionStatus status) {
+    if (status == FAILED || status == FINISHED || status == SKIPPED || status == CANCELLED) {
+      return true;
+    }
+    return false;
+  }
 }

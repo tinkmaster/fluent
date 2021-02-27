@@ -1,5 +1,11 @@
 package tech.tinkmaster.fluent.core.scheduler.executors;
 
+import java.io.IOException;
+import java.net.URI;
+import java.net.URISyntaxException;
+import java.util.Arrays;
+import java.util.HashMap;
+import java.util.Map;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import tech.tinkmaster.fluent.common.entity.execution.Execution;
@@ -9,23 +15,16 @@ import tech.tinkmaster.fluent.common.util.http.http.FluentHttpPortal;
 import tech.tinkmaster.fluent.common.util.http.http.FluentHttpRequest;
 import tech.tinkmaster.fluent.common.util.http.http.FluentHttpResponse;
 
-import java.io.IOException;
-import java.net.URI;
-import java.net.URISyntaxException;
-import java.util.Arrays;
-import java.util.HashMap;
-import java.util.Map;
-
 public class HttpOperatorExecutor implements OperatorExecutor {
   private static final Logger LOG = LoggerFactory.getLogger(HttpOperatorExecutor.class);
   private Operator operator;
-  private Execution diagram;
+  private Execution graph;
 
   private FluentHttpRequest request;
 
-  public HttpOperatorExecutor(Execution diagram, Operator operator) {
+  public HttpOperatorExecutor(Execution graph, Operator operator) {
     this.operator = operator;
-    this.diagram = diagram;
+    this.graph = graph;
 
     Map<String, String> parameters = operator.getParams();
     Map<String, String> headers = new HashMap<>();

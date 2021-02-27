@@ -1,5 +1,9 @@
 package tech.tinkmaster.fluent.api.server.resources.v1.execution;
 
+import java.io.IOException;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
 import tech.tinkmaster.fluent.api.server.responses.ResponseEntity;
@@ -13,11 +17,6 @@ import tech.tinkmaster.fluent.common.exceptions.FluentNotFoundException;
 import tech.tinkmaster.fluent.service.execution.ExecutionService;
 import tech.tinkmaster.fluent.service.operator.OperatorService;
 
-import java.io.IOException;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-
 @RestController
 @RequestMapping("/api/v1/executions")
 public class ExecutionController {
@@ -25,13 +24,13 @@ public class ExecutionController {
   @Autowired ExecutionService service;
   @Autowired OperatorService operatorService;
 
-  @GetMapping(path = "{pipelineName}/diagram")
+  @GetMapping(path = "{pipelineName}/graph")
   public ResponseEntity list(@PathVariable("pipelineName") String pipelineName) throws IOException {
-    List<Execution> diagrams = this.service.list(pipelineName);
-    if (diagrams == null) {
+    List<Execution> graphs = this.service.list(pipelineName);
+    if (graphs == null) {
       throw new FluentNotFoundException("Can't find execution named " + pipelineName);
     } else {
-      return ResponseEntity.ok(diagrams);
+      return ResponseEntity.ok(graphs);
     }
   }
 
@@ -46,7 +45,7 @@ public class ExecutionController {
     }
   }
 
-  @GetMapping(path = "{pipelineName}/diagram/{name}")
+  @GetMapping(path = "{pipelineName}/graph/{name}")
   public ResponseEntity get(
       @PathVariable("pipelineName") String pipelineName, @PathVariable("name") String name)
       throws IOException {
@@ -71,10 +70,10 @@ public class ExecutionController {
               }
             });
 
-    Execution diagram =
+    Execution graph =
         ExecutionUtils.generateExecution(
             pipeline, operatorMap, pipeline.getParameters(), pipeline.getEnvironment());
-    this.service.updateOrCreate(diagram);
-    return ResponseEntity.ok(diagram);
+    this.service.updateOrCreate(graph);
+    return ResponseEntity.ok(graph);
   }
 }

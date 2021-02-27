@@ -1,5 +1,7 @@
 package tech.tinkmaster.fluent.core;
 
+import java.io.IOException;
+import java.util.List;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -10,9 +12,6 @@ import tech.tinkmaster.fluent.common.entity.execution.ExecutionStatus;
 import tech.tinkmaster.fluent.service.execution.ExecutionService;
 import tech.tinkmaster.fluent.service.pipeline.PipelineService;
 
-import java.io.IOException;
-import java.util.List;
-
 @Component
 public class PipelineTaskDetector {
   private static final Logger LOG = LoggerFactory.getLogger(PipelineTaskDetector.class);
@@ -21,22 +20,22 @@ public class PipelineTaskDetector {
   @Autowired PipelineService pipelineService;
 
   @Scheduled(fixedDelay = 10000)
-  public void detectExecutionDiagram() {
+  public void detectExecutionGraph() {
     List<String> pipelines = this.pipelineService.list();
 
-    pipelines.stream()
+    pipelines
+        .stream()
         .forEach(
             pipeline -> {
               try {
-                List<Execution> diagrams = this.service.list(pipeline);
-                diagrams.stream()
+                List<Execution> graphs = this.service.list(pipeline);
+                graphs
+                    .stream()
                     .forEach(
                         dia -> {
                           try {
                             Execution execution = this.service.get(pipeline, dia.getName());
-                            if (execution.getStatus() == ExecutionStatus.CREATED
-                                || execution.getStatus() == ExecutionStatus.WAITING_TO_BE_SCHEDULED
-                                || execution.getStatus() == ExecutionStatus.RUNNING) {
+                            if (ExecutionStatus.needToRun(execution.getStatus())) {
                               LOG.info("Submit graph {} to scheduler service.", dia.getName());
                               PipelineSchedulerService.submit(execution);
                             }

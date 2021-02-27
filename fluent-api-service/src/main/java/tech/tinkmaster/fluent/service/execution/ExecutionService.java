@@ -1,16 +1,15 @@
 package tech.tinkmaster.fluent.service.execution;
 
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.stereotype.Service;
-import tech.tinkmaster.fluent.common.entity.execution.*;
-import tech.tinkmaster.fluent.persistence.file.ExecutionStorage;
-
 import java.io.IOException;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.Collections;
 import java.util.List;
 import java.util.stream.Collectors;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Service;
+import tech.tinkmaster.fluent.common.entity.execution.*;
+import tech.tinkmaster.fluent.persistence.file.ExecutionStorage;
 
 @Service
 public class ExecutionService {
@@ -22,7 +21,8 @@ public class ExecutionService {
     if (records.size() == 0) {
       return Collections.emptyList();
     }
-    return records.stream()
+    return records
+        .stream()
         .map(
             name -> {
               String[] arr = name.split("-");
@@ -34,7 +34,7 @@ public class ExecutionService {
                         name, arr[0], dateStr.parse(arr[1]), execution.getStatus());
                 return res;
               } catch (ParseException | IOException e) {
-                throw new RuntimeException("Failed to list execution diagram in service.", e);
+                throw new RuntimeException("Failed to list execution graph in service.", e);
               }
             })
         .sorted((dia1, dia2) -> dia2.getCreatedTime().compareTo(dia1.getCreatedTime()))
@@ -47,18 +47,19 @@ public class ExecutionService {
     if (records.size() == 0) {
       return result;
     }
-    records.stream()
+    records
+        .stream()
         .forEach(
             name -> {
               String[] arr = name.split("-");
               SimpleDateFormat dateStr = new SimpleDateFormat("yyMMddHHmmss");
               try {
-                Execution diagram = this.storage.get(pipelineName, name);
+                Execution graph = this.storage.get(pipelineName, name);
                 result.setTotalExecutionTimes(result.getTotalExecutionTimes() + 1);
-                this.countStatus(diagram, result);
+                this.countStatus(graph, result);
 
               } catch (IOException e) {
-                throw new RuntimeException("Failed to list execution diagram in service.", e);
+                throw new RuntimeException("Failed to list execution graph in service.", e);
               }
             });
     if (result.getSuccessfulExecutionNumber() > 0) {
@@ -72,8 +73,8 @@ public class ExecutionService {
     return this.storage.get(pipelineName, name);
   }
 
-  public void updateOrCreate(Execution diagram) throws IOException {
-    this.storage.updateOrCreate(diagram);
+  public void updateOrCreate(Execution graph) throws IOException {
+    this.storage.updateOrCreate(graph);
   }
 
   public void delete(String pipelineName, String name) throws IOException {
