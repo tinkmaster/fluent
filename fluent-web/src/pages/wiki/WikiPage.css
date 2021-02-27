@@ -1,0 +1,28 @@
+.wiki-page table{
+    margin-bottom: 1rem;
+}
+
+.wiki-page tr {
+    border-top: 1px solid #c6cbd1;
+    background: #fff;
+}
+
+.wiki-page td {
+    padding: 6px 13px;
+    border: 1px solid #dfe2e5;
+}
+
+.wiki-page th {
+    padding: 6px 13px;
+    border: 1px solid #dfe2e5;
+}
+
+.wiki-page table tr:nth-child(2n) {
+    background: #f6f8fa;
+}
+
+.wiki-page code {
+    padding: 0px 8px 0px 8px;
+    background: rgb(245, 242, 240);
+    font-family: Consolas, Monaco, "Andale Mono", "Ubuntu Mono", monospace;
+}

@@ -36,6 +36,7 @@ export class VariablePage extends React.Component {
                         flexDirection: 'column', 
                         height: 'calc(100vh - 120px)', 
                         background: 'white',
+                        overflow: 'auto',
                         paddingLeft: '10px'}}>
                         <Global
                             globalVariable={this.props.globalVariable}

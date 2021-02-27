@@ -2,8 +2,6 @@
 **/.log*
 **/data-dir
 **/logs
-scripts
-**/scripts
 **/target
 .DS_Store
 .github
