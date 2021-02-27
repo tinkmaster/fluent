@@ -6,5 +6,5 @@ import tech.tinkmaster.fluent.service.variable.VariableService;
 public interface FluentVariableResolveFunction {
   String name();
 
-  String resolve(Execution diagram, String parameter, VariableService variableService);
+  String resolve(Execution graph, String parameter, VariableService variableService);
 }

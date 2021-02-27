@@ -18,16 +18,16 @@ public class ParseJsonFunction implements FluentVariableResolveFunction {
   /**
    * Return the value that matches the certain path
    *
-   * @param diagram execution information
+   * @param graph execution information
    * @param parameter the original data and the certain path, two parts only
    * @return the value matches the certain path
    */
   @Override
-  public String resolve(Execution diagram, String parameter, VariableService variableService) {
+  public String resolve(Execution graph, String parameter, VariableService variableService) {
     String path = parameter.substring(parameter.lastIndexOf(",") + 1, parameter.length()).trim();
     String var = parameter.substring(0, parameter.lastIndexOf(",")).trim();
 
-    String result = variablesResolver.resolve(diagram, var, variableService);
+    String result = variablesResolver.resolve(graph, var, variableService);
 
     JsonNode node = JsonUtils.isJsonFormation(result);
 

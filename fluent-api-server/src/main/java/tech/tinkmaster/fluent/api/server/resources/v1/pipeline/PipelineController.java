@@ -37,7 +37,7 @@ public class PipelineController {
         new String[] {"env.", "pipeline.", "currentEnv.", "operators", "global.", "secret."};
     // check pipeline parameters formation
     if (pipeline.getParameters() != null && pipeline.getParameters().size() > 0) {
-      if (pipeline
+      if (!pipeline
           .getParameters()
           .keySet()
           .stream()
@@ -45,13 +45,11 @@ public class PipelineController {
               p ->
                   p.matches("[a-z0-9A-Z]+")
                       && Arrays.stream(forbiddenKeys).noneMatch(p::startsWith))) {
-        this.service.updateOrCreate(pipeline);
-      } else {
         throw new FluentEntityIllegalException(
             "Illegal pipeline parameters, only letters and number are allowed.");
       }
     }
-
+    this.service.updateOrCreate(pipeline);
     return ResponseEntity.ok(pipeline);
   }
 

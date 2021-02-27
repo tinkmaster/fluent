@@ -6,12 +6,12 @@ import tech.tinkmaster.fluent.service.variable.VariableService;
 
 public class OperatorExecutionFetcher {
   public static OperatorExecutor getPairedExecutor(
-      Execution diagram, Operator operator, VariableService variableService) {
+      Execution graph, Operator operator, VariableService variableService) {
     switch (operator.getType()) {
       case HTTP_REQUEST:
-        return new HttpOperatorExecutor(diagram, operator);
+        return new HttpOperatorExecutor(graph, operator);
       case DATA_VALIDATION:
-        return new DataValidationOperatorExecutor(diagram, operator, variableService);
+        return new DataValidationOperatorExecutor(graph, operator, variableService);
       default:
         throw new UnsupportedOperationException(
             "Not supported operator " + operator.getType().name());

@@ -1,8 +1,10 @@
 package tech.tinkmaster.fluent.core.scheduler;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
+import java.io.IOException;
+import java.util.HashMap;
+import java.util.Map;
 import lombok.Getter;
-import org.apache.commons.lang3.tuple.Pair;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import tech.tinkmaster.fluent.common.FluentObjectMappers;
@@ -15,10 +17,6 @@ import tech.tinkmaster.fluent.core.failure.ExecutionFailure;
 import tech.tinkmaster.fluent.core.scheduler.executors.OperatorExecutionFetcher;
 import tech.tinkmaster.fluent.core.scheduler.executors.OperatorExecutor;
 import tech.tinkmaster.fluent.service.variable.VariableService;
-
-import java.io.IOException;
-import java.util.HashMap;
-import java.util.Map;
 
 @Getter
 public class ExecutionScheduler extends Thread {
@@ -37,6 +35,7 @@ public class ExecutionScheduler extends Thread {
         (t, e) -> LOG.error("Uncaught exception found in execution scheduler.", e));
   }
 
+  /** First overall recheck the graph status and then find the node to run */
   @Override
   public void run() {
     LOG.info("Execution scheduler-{} starts.", this.scheduleId);
@@ -49,23 +48,18 @@ public class ExecutionScheduler extends Thread {
       if (this.variableService == null) {
         this.variableService = PipelineSchedulerService.getVariableService();
       }
+      this.execution = ExecutionSchedulerUtils.updateExecutionGraphStatus(this.execution);
 
-      while (true) {
-        Pair<String, Integer> nodeNextToRunPair =
-            ExecutionSchedulerUtils.findNextNodeToExecute(this.execution);
-        if (nodeNextToRunPair == null) {
-          this.setExecutionStatus(ExecutionStatus.FINISHED);
-          this.updateExecutionStatus();
-          this.execution = null;
-          this.schdulerStatus = SchedulerStatus.IDLE;
-          break;
-        }
-        String currentStage = nodeNextToRunPair.getLeft();
-        Integer nodeId = nodeNextToRunPair.getRight();
+      while (ExecutionStatus.needToRun(this.execution.getStatus())) {
+        Integer nodeId = null;
+        String currentStage = null;
         try {
-
+          nodeId = ExecutionSchedulerUtils.findNextNodeToExecute(this.execution);
+          currentStage = this.execution.getStages().getCurrentExecutionStage();
+          currentStage = this.execution.getStages().getCurrentExecutionStage();
           this.execution = ExecutionUtils.setCurrentStage(this.execution, currentStage);
-          // execution log store in execution diagram snapshot
+
+          // execution log store in execution graph snapshot
           LOG.debug(
               "Start to execute operator id {} in stage {} in execution {}",
               nodeId,
@@ -74,7 +68,6 @@ public class ExecutionScheduler extends Thread {
           long current = System.currentTimeMillis();
           ExecutionUtils.setGraphNodeStatus(
               this.execution, currentStage, nodeId, ExecutionStatus.RUNNING);
-          this.updateExecutionStatus();
 
           Object result =
               this.executeOperator(
@@ -85,33 +78,41 @@ public class ExecutionScheduler extends Thread {
 
           ExecutionUtils.setGraphNodeUsedTime(
               this.execution, currentStage, nodeId, System.currentTimeMillis() - current);
-          LOG.debug(
-              "Finish executing operator id {} in stage {}  in execution {}",
-              nodeId,
-              currentStage,
-              this.execution.getName());
           ExecutionUtils.setGraphNodeStatus(
               this.execution, currentStage, nodeId, ExecutionStatus.FINISHED);
           ExecutionUtils.getCurrentExecutionGraph(this.execution)
               .getResults()
               .put(
-                  String.valueOf(nodeId),
+                  nodeId,
                   FluentObjectMappers.getNewConfiguredJsonMapper().writeValueAsString(result));
+
+          this.execution = ExecutionSchedulerUtils.updateExecutionGraphStatus(this.execution);
+          this.updateExecutionStatus();
+          LOG.debug(
+              "Finish executing operator id {} in stage {} in execution {}",
+              nodeId,
+              currentStage,
+              this.execution.getName());
         } catch (Throwable t) {
-          LOG.error("Failed to execute node:{}", nodeId, t);
+          LOG.error(
+              "Failed to execute operator id {} in stage {} in execution {}",
+              nodeId,
+              currentStage,
+              this.execution.getName(),
+              t);
           Map<String, Object> result = new HashMap<>();
           if (t instanceof ExecutionFailure) {
             try {
               result.put(
                   "error",
                   String.format(
-                      "Failed to executor operator, caused by: %s",
+                      "Failed to execute operator, caused by: %s",
                       t.getMessage().replaceAll("\"", "'")));
               result.put("data", ((ExecutionFailure) t).getResult());
               ExecutionUtils.getCurrentExecutionGraph(this.execution)
                   .getResults()
                   .put(
-                      String.valueOf(nodeId),
+                      nodeId,
                       FluentObjectMappers.getNewConfiguredJsonMapper().writeValueAsString(result));
             } catch (JsonProcessingException e) {
               LOG.error("Failed to store node execution result", t);
@@ -120,7 +121,7 @@ public class ExecutionScheduler extends Thread {
             ExecutionUtils.getCurrentExecutionGraph(this.execution)
                 .getResults()
                 .put(
-                    String.valueOf(nodeId),
+                    nodeId,
                     "{ \"error\": \"Failed to executor operator, caused by: "
                         + (t.getMessage() != null
                             ? t.getMessage().replaceAll("\"", "'")
@@ -128,14 +129,13 @@ public class ExecutionScheduler extends Thread {
                         + "\"}");
           }
           ExecutionUtils.setGraphNodeStatus(
-                  this.execution, currentStage, nodeId, ExecutionStatus.FAILED);
+              this.execution, currentStage, nodeId, ExecutionStatus.FAILED);
           this.execution = this.execution.toBuilder().status(ExecutionStatus.RUNNING).build();
-          this.updateExecutionStatus();
-          this.execution = null;
-          this.schdulerStatus = SchedulerStatus.IDLE;
-          break;
         }
       }
+      this.updateExecutionStatus();
+      this.execution = null;
+      this.schdulerStatus = SchedulerStatus.IDLE;
     }
   }
 
@@ -165,6 +165,6 @@ public class ExecutionScheduler extends Thread {
   }
 
   private void updateExecutionStatus() {
-    PipelineSchedulerService.updateDiagramStatus(this.execution);
+    PipelineSchedulerService.updateGraphStatus(this.execution);
   }
 }
