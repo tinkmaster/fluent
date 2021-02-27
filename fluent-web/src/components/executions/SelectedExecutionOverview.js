@@ -11,13 +11,13 @@ export class SelectedExecutionOverview extends Component {
     render() {
         let time = 0
         let completionProgress = 0;
-        let nodeIds = Object.keys(this.props.selectedHistory.nodes)
+        let nodes = this.props.selectedExecution.stages[this.props.executionCurrentStage].nodes
+        let nodeIds = Object.keys(nodes)
         for (let i = 0; i < nodeIds.length; i++) {
-            if (this.props.selectedHistory.nodes[nodeIds[i]].usedTime) {
-                time = time + this.props.selectedHistory.nodes[nodeIds[i]].usedTime
-                
+            if (nodes[nodeIds[i]].usedTime) {
+                time = time + nodes[nodeIds[i]].usedTime
             }
-            if (this.props.selectedHistory.nodes[nodeIds[i]].status && this.props.selectedHistory.nodes[nodeIds[i]].status == 'FINISHED') {
+            if (nodes[nodeIds[i]].status && nodes[nodeIds[i]].status == 'FINISHED') {
                 completionProgress = completionProgress + 1
             }
         }
@@ -34,17 +34,17 @@ export class SelectedExecutionOverview extends Component {
                     <div>
                         <Row gutter={16}>
                             <Col span={8}>
-                                <Statistic title="Status" value={this.props.selectedHistory.status === 'CREATED' || this.props.selectedHistory.status === 'WAITING_TO_BE_SCHEDULED' ?
+                                <Statistic title="Status" value={this.props.selectedExecution.status === 'CREATED' || this.props.selectedExecution.status === 'WAITING_TO_BE_SCHEDULED' ?
                                           'Waiting to be scheduled...':
-                                                this.props.selectedHistory.status === 'RUNNING' ?
+                                                this.props.selectedExecution.status === 'RUNNING' ?
                                                 'Running...':
-                                                this.props.selectedHistory.status === 'FINISHED' ?
+                                                this.props.selectedExecution.status === 'FINISHED' ?
                                                 'Finished':
-                                                this.props.selectedHistory.status === 'FAILED' ?
+                                                this.props.selectedExecution.status === 'FAILED' ?
                                                 'Failed' : ''}></Statistic>
                             </Col>
                             <Col span={8}>
-                                <Statistic title="Start Time" value={timestampToDateTime(new Date(this.props.selectedHistory.createdTime))}/>
+                                <Statistic title="Start Time" value={timestampToDateTime(new Date(this.props.selectedExecution.createdTime))}/>
                             </Col>
                         </Row>
                         <Row gutter={16} style={{marginTop: 18}}>
@@ -56,7 +56,7 @@ export class SelectedExecutionOverview extends Component {
                             </Col>
                         </Row>
                         <Row style={{marginTop: 66}}>
-                            <Alert style={{textAlign: 'center', margin: 'auto'}} message="Click the operator in the diagram to display its information" type="success" />
+                            <Alert style={{textAlign: 'center', margin: 'auto'}} message="Click the operator in the graph to display its information" type="success" />
                         </Row>
                     </div>
                     

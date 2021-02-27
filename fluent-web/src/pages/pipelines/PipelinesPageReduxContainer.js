@@ -5,9 +5,10 @@ import {
     listPipelines,
     postPipeline,
     selectPipeline,
-    updatePipeline
+    updatePipeline,
+    handleStageChange
 } from "../../services/PipelineService";
-import {createExecutionDiagram, getExecutionDiagram, getExecutionOverview, listExecutionDiagram} from "../../services/ExecutionService";
+import {createExecutionGraph, getExecutionGraph, getExecutionOverview, listExecutionGraph} from "../../services/ExecutionService";
 import {UPDATE_PIPELINE_PAGE, updatePipelineGraph} from "./PipelinesPageReducer";
 import {
     addOperatorToPipelineGraph,
@@ -22,13 +23,15 @@ const mapStateToProps = (state) => {
     return {
         pipelines: state.PipelinePageReducer.pipelines,
         selectedPipeline: state.PipelinePageReducer.selectedPipeline,
-        pipelineData: state.PipelinePageReducer.pipelineData,
+        pipelineGraphData: state.PipelinePageReducer.pipelineGraphData,
         pipelineParamsFormVisible: state.PipelinePageReducer.pipelineParamsFormVisible,
+        pipelineCurrentStage: state.PipelinePageReducer.pipelineCurrentStage,
+        executionCurrentStage: state.PipelinePageReducer.executionCurrentStage,
 
-        executionDiagramList: state.PipelinePageReducer.executionDiagramList,
-        selectedHistory: state.PipelinePageReducer.selectedHistory,
+        executionGraphList: state.PipelinePageReducer.executionGraphList,
+        selectedExecution: state.PipelinePageReducer.selectedExecution,
         executionData: state.PipelinePageReducer.executionData,
-        selectedHistoryNode: state.PipelinePageReducer.selectedHistoryNode,
+        selectedExecutionNode: state.PipelinePageReducer.selectedExecutionNode,
         operators: state.PipelinePageReducer.operators,
         selectedOperator: state.PipelinePageReducer.selectedOperator,
         operatorDetailsVisible: state.PipelinePageReducer.operatorDetailsVisible,
@@ -47,6 +50,9 @@ const mapDispatchToProps = (dispatch) => ({
     },
     addOperatorToPipelineGraph: (name) => {
         dispatch(addOperatorToPipelineGraph(name));
+    },
+    handleStageChange: (stageName, pipelineGraphData) => {
+        dispatch(handleStageChange(stageName, pipelineGraphData))
     },
     updatePipelineGraph: (nodes) => {
         dispatch(updatePipelineGraph(nodes));
@@ -77,17 +83,17 @@ const mapDispatchToProps = (dispatch) => ({
         dispatch(deletePipeline(name))
     },
     runPipeline: (value) => {
-        dispatch(createExecutionDiagram(value))
+        dispatch(createExecutionGraph(value))
     },
 
     updatePipelinePageState: (...key) => {
         dispatch(updatePipelinePageState(key))
     },
     getExactExecutionHistory: (pipelineName, name) => {
-        dispatch(getExecutionDiagram(pipelineName, name))
+        dispatch(getExecutionGraph(pipelineName, name))
     },
-    listExecutionDiagram: (name) => {
-        dispatch(listExecutionDiagram(name))
+    listExecutionGraph: (name) => {
+        dispatch(listExecutionGraph(name))
     },
     getExecutionOverview: (name) => {
         dispatch(getExecutionOverview(name))
