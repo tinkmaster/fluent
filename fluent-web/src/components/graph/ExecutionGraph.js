@@ -44,7 +44,7 @@ export class ExecutionGraph extends React.Component {
                         </PageHeader>
                     </div>
                 </div>
-                <div style={{height:'100%', width: '100%'}}>
+                <div style={{height:'88%', width: '100%'}}>
                     <ReactFlow
                         elements={this.props.executionData}
                         nodesConnectable={false}
@@ -55,7 +55,6 @@ export class ExecutionGraph extends React.Component {
                             this.props.updatePipelinePageState("selectedHistoryNode", element.id)}
                     >
                         <MiniMap
-                            style={{marginBottom: '44px'}}
                             nodeColor={(node) => {
                                 switch (node.type) {
                                     case 'input':

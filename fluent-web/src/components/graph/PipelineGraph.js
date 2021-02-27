@@ -96,14 +96,14 @@ export class PipelineGraph extends React.Component {
                             <div style={{display: 'flex'}}>
                                 <h3 style={{paddingLeft: '8px', margin: 'auto'}}>Env:</h3>
                                  {this.props.envSelectLoading?
-                                    <div style={{marginLeft: '8px', width: 180}}>
+                                    <div style={{marginLeft: '8px', width: 130}}>
                                         <Spin style={{margin: 'auto', paddingLeft: 64, paddingTop: 8 }}/>
                                     </div> : 
                                     <Select 
                                          allowClear
                                          defaultValue={this.props.selectedPipeline.environment}
                                          placeholder="Choose Env"
-                                         style={{ width: 180, marginLeft: 8 }}
+                                         style={{ width: 130, marginLeft: 8 }}
                                          onChange={this.handleChange}
                                          >
                                          {this.props.envsList ? 
@@ -118,7 +118,7 @@ export class PipelineGraph extends React.Component {
                         ]}>
                     </PageHeader>
                 </div>
-                <div style={{height:'100%', width: '100%'}}>
+                <div style={{height:'88%', width: '100%'}}>
                     <ReactFlow
                         elements={this.props.pipelineData}
                         nodeTypes={nodeTypes}
@@ -131,7 +131,6 @@ export class PipelineGraph extends React.Component {
                         defaultZoom={0.5}
                 >
                         <MiniMap
-                            style={{marginBottom: '44px'}}
                             nodeColor={(node) => {
                                 switch (node.type) {
                                     case 'input':

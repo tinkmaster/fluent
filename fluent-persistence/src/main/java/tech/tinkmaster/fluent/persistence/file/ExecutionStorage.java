@@ -1,6 +1,13 @@
 package tech.tinkmaster.fluent.persistence.file;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
+import org.apache.commons.io.FileUtils;
+import org.springframework.beans.factory.annotation.Value;
+import org.springframework.stereotype.Component;
+import tech.tinkmaster.fluent.common.FluentObjectMappers;
+import tech.tinkmaster.fluent.common.entity.execution.Execution;
+
+import javax.annotation.PostConstruct;
 import java.io.File;
 import java.io.IOException;
 import java.nio.charset.Charset;
@@ -10,12 +17,6 @@ import java.util.Collections;
 import java.util.List;
 import java.util.Stack;
 import java.util.stream.Collectors;
-import javax.annotation.PostConstruct;
-import org.apache.commons.io.FileUtils;
-import org.springframework.beans.factory.annotation.Value;
-import org.springframework.stereotype.Component;
-import tech.tinkmaster.fluent.common.FluentObjectMappers;
-import tech.tinkmaster.fluent.common.entity.execution.ExecutionDiagram;
 
 /** ${base}/namespaces/default/executions/${name} */
 @Component
@@ -34,8 +35,7 @@ public class ExecutionStorage {
   public List<String> list(String pipelineName) {
     File file = Paths.get(this.baseDir, this.getExecutionDiagramFilePath(), pipelineName).toFile();
     if (file.exists() && file.isDirectory()) {
-      return FileUtils.listFiles(file, null, false)
-          .stream()
+      return FileUtils.listFiles(file, null, false).stream()
           .map(File::getName)
           .collect(Collectors.toList());
     } else {
@@ -43,20 +43,20 @@ public class ExecutionStorage {
     }
   }
 
-  public ExecutionDiagram get(String pipelineName, String name) throws IOException {
+  public Execution get(String pipelineName, String name) throws IOException {
     File file =
         Paths.get(this.baseDir, this.getExecutionDiagramFilePath(), pipelineName, name).toFile();
     if (file.exists()) {
-      ExecutionDiagram diagram =
+      Execution diagram =
           this.mappers.readValue(
-              FileUtils.readFileToString(file, Charset.defaultCharset()), ExecutionDiagram.class);
+              FileUtils.readFileToString(file, Charset.defaultCharset()), Execution.class);
       return diagram;
     } else {
       return null;
     }
   }
 
-  public void updateOrCreate(ExecutionDiagram diagram) throws IOException {
+  public void updateOrCreate(Execution diagram) throws IOException {
     File file =
         Paths.get(
                 this.baseDir,
