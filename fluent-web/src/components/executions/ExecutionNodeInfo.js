@@ -31,10 +31,11 @@ export class ExecutionNodeInfo extends React.Component {
     }
 
     render() {
+        console.log(this.props)
         let nodeResult;
         let dataValidationData = [];
-        if (this.props.diagram.results[this.props.node.id]) {
-            nodeResult = JSON.parse(this.props.diagram.results[this.props.node.id]);
+        if (this.props.graph.results[this.props.node.id]) {
+            nodeResult = JSON.parse(this.props.graph.results[this.props.node.id]);
             if (this.props.node.operator.type === 'DATA_VALIDATION') {
                 if (this.props.node.status === 'FINISHED') {
                     Object.keys(nodeResult).map(variable => {

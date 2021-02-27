@@ -6,14 +6,14 @@ import {
     POST_PIPELINE_ADDRESS
 } from "../interfaces/Constant";
 import {message} from 'antd';
-import {getExecutionOverview, listExecutionDiagram} from "./ExecutionService";
+import {getExecutionOverview, listExecutionGraph} from "./ExecutionService";
 import {
-    editPipelineAction,
+    selectPipelineAction,
     freshPipelineListAction,
-    updatePipelineGraph
+    updatePipelineGraph,
+    updateGraphStage
 } from "../pages/pipelines/PipelinesPageReducer";
-import React from "react";
-import {drawPipelineGraph} from "./GraphService";
+import {drawPipelineGraph, redrawPipelineGraph} from "./GraphService";
 
 export function listPipelines() {
     return dispatch => {
@@ -31,8 +31,8 @@ export function selectPipeline(name) {
         get(GET_PIPELINE_ADDRESS.replace("{}", name)).then(
             response => {
                 if (response.data.code === 200) {
-                    dispatch(editPipelineAction(response.data.data));
-                    if (response.data.data && response.data.data.operators) {
+                    dispatch(selectPipelineAction(response.data.data));
+                    if (response.data.data) {
                         const res = drawPipelineGraph(response.data.data)
                         dispatch(updatePipelineGraph(res))
                     } else {
@@ -42,7 +42,7 @@ export function selectPipeline(name) {
             }
         ).then(
             () => {
-                dispatch(listExecutionDiagram(name));
+                dispatch(listExecutionGraph(name));
                 dispatch(getExecutionOverview(name))
             }
         )
@@ -67,7 +67,7 @@ export function updatePipeline(name, values) {
         post(POST_PIPELINE_ADDRESS, values).then(
             response => {
                 if (response.data.code === 200) {
-                    dispatch(editPipelineAction(response.data.data))
+                    dispatch(selectPipelineAction(response.data.data))
                     message.success("Update pipeline successfully.")
                 }
             }
@@ -89,5 +89,12 @@ export function deletePipeline(name) {
                 }
             }
         )
+    }
+}
+
+export function handleStageChange(stageName, pipelineGraphData){
+    let templatePipelineGrapgData = redrawPipelineGraph(pipelineGraphData)
+    return dispatch => {
+        dispatch(updateGraphStage(stageName, templatePipelineGrapgData))
     }
 }

@@ -47,21 +47,21 @@ export class PipelinesPage extends React.Component {
         clearInterval(this.refreshExecutionOverview)
         this.refreshExecutionOverview = null;
         this.props.getExactExecutionHistory(this.props.selectedPipeline.name, name)
-        this.props.updatePipelinePageState("selectedHistoryNode", null)
+        this.props.updatePipelinePageState("selectedExecutionNode", null)
         if (!this.refreshHistoryTime) {
-            this.refreshHistoryTime = setInterval(() => this.refreshHistoryDiagram(), 8000)
+            this.refreshHistoryTime = setInterval(() => this.refreshHistoryGraph(), 8000)
         }
     }
 
     refreshHistoryList() {
         if (this.props.selectedPipeline) {
-            this.props.listExecutionDiagram(this.props.selectedPipeline.name)
+            this.props.listExecutionGraph(this.props.selectedPipeline.name)
         }
     }
 
-    refreshHistoryDiagram() {
-        if (this.props.selectedHistory && (this.props.selectedHistory.status !== 'FINISHED' && this.props.selectedHistory.status !== 'FAILED')) {
-            this.props.getExactExecutionHistory(this.props.selectedPipeline.name, this.props.selectedHistory.name)
+    refreshHistoryGraph() {
+        if (this.props.selectedExecution && (this.props.selectedExecution.status !== 'FINISHED' && this.props.selectedExecution.status !== 'FAILED')) {
+            this.props.getExactExecutionHistory(this.props.selectedPipeline.name, this.props.selectedExecution.name)
         } else if (this.refreshHistoryTime){
             clearInterval(this.refreshHistoryTime)
             this.refreshHistoryTime = null;
@@ -70,8 +70,8 @@ export class PipelinesPage extends React.Component {
 
     selectPipeline = (name) => {
         this.props.updatePipelinePageState('executionData', null, 
-            'selectedHistory', null, 
-            'selectedHistoryNode', null,
+            'selectedExecution', null, 
+            'selectedExecutionNode', null,
             'pipelineSelectedEnv', null,
             'envSelectLoading', true)
         this.props.selectPipeline(name)
@@ -85,9 +85,9 @@ export class PipelinesPage extends React.Component {
         }
     }
 
-    onElementClick = (event, element) => this.props.updatePipelinePageState("selectedHistoryNode", element.id)
+    onElementClick = (event, element) => this.props.updatePipelinePageState("selectedExecutionNode", element.id)
 
-    runDiagram = () => {
+    runGraph = () => {
         message.warn('Not support yet.')
     }
 
@@ -160,11 +160,12 @@ export class PipelinesPage extends React.Component {
                             >
                             </Empty></div>
                             :
-                            this.props.selectedHistory && this.props.executionData ?
+                            this.props.selectedExecution && this.props.executionData ?
                                 <ExecutionGraph
-                                    selectedHistory={this.props.selectedHistory}
+                                    selectedExecution={this.props.selectedExecution}
                                     executionData={this.props.executionData}
                                     updatePipelinePageState={this.props.updatePipelinePageState}
+                                    executionCurrentStage={this.props.executionCurrentStage}
                                 />
                                 :
                                 <PipelineGraph
@@ -172,7 +173,9 @@ export class PipelinesPage extends React.Component {
                                     envsList={this.props.envsList}
                                     pipelineSelectedEnv={this.props.pipelineSelectedEnv}
                                     envSelectLoading={this.props.envSelectLoading}
-                                    pipelineData={this.props.pipelineData}
+                                    pipelineGraphData={this.props.pipelineGraphData}
+                                    pipelineCurrentStage={this.props.pipelineCurrentStage}
+                                    handleStageChange={this.props.handleStageChange}
                                     selectedPipeline={this.props.selectedPipeline}
                                     updatePipelineGraph={this.props.updatePipelineGraph}
                                     runPipeline={this.props.runPipeline}
@@ -188,23 +191,24 @@ export class PipelinesPage extends React.Component {
                     }}>
                         <div style={{width: '25%'}}>
                             <ExecutionHistoryList
-                                executionDiagramList={this.props.executionDiagramList}
-                                selectedHistory={this.props.selectedHistory}
-                                selectedHistoryNode={this.props.selectedHistoryNode}
+                                executionGraphList={this.props.executionGraphList}
+                                selectedExecution={this.props.selectedExecution}
+                                selectedExecutionNode={this.props.selectedExecutionNode}
                                 updatePipelinePageState={this.props.updatePipelinePageState}
                                 selectExecution={(name) => this.getHistory(name)}
                             />
                         </div>
                         <div style={{width: '75%'}}>
-                            { this.props.selectedHistoryNode ? 
+                            { this.props.selectedExecutionNode ? 
                                 <ExecutionNodeInfo
-                                node={this.props.selectedHistory ? 
-                                    this.props.selectedHistory.nodes[this.props.selectedHistoryNode] : undefined}
-                                diagram={this.props.selectedHistory}
+                                    node={this.props.selectedExecution ? 
+                                        this.props.selectedExecution.stages[this.props.executionCurrentStage].nodes[this.props.selectedExecutionNode] : undefined}
+                                    graph={this.props.selectedExecution.stages[this.props.executionCurrentStage]}
                                 /> : 
-                                (this.props.selectedHistory?
+                                (this.props.selectedExecution?
                                     <SelectedExecutionOverview
-                                    selectedHistory={this.props.selectedHistory}
+                                        selectedExecution={this.props.selectedExecution}
+                                        executionCurrentStage={this.props.executionCurrentStage}
                                     />
                                     : 
                                     <ExecutionHistoryOverview

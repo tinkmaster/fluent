@@ -1,16 +1,17 @@
+import { act } from "react-dom/test-utils";
 import {isNode} from "react-flow-renderer";
 
-const LIST_EXECUTION_DIAGRAM = "LIST_EXECUTION_DIAGRAM"
-const GET_EXECUTION_DIAGRAM = "GET_EXECUTION_DIAGRAM"
+const LIST_EXECUTION_GRAPH = "LIST_EXECUTION_GRAPH"
+const GET_EXECUTION_GRAPH = "GET_EXECUTION_GRAPH"
 const PIPELINE_EDIT_OPERATOR = 'PIPELINE_EDIT_OPERATOR';
 const GET_EXECUTION_OVERVIEW = 'GET_EXECUTION_OVERVIEW';
 
-export const listExecutionDiagramListAction = (data) => ({
-    type: LIST_EXECUTION_DIAGRAM,
+export const listExecutionGraphListAction = (data) => ({
+    type: LIST_EXECUTION_GRAPH,
     data: data
 })
-export const getExecutionDiagramListAction = (data) => ({
-    type: GET_EXECUTION_DIAGRAM,
+export const getExecutionGraphListAction = (data) => ({
+    type: GET_EXECUTION_GRAPH,
     data: data
 })
 export const getExecutionOverviewAction = (data) => ({
@@ -20,15 +21,16 @@ export const getExecutionOverviewAction = (data) => ({
 
 export const PipelinePageReducer = (state, action) => {
     switch (action.type) {
-        case LIST_EXECUTION_DIAGRAM:
+        case LIST_EXECUTION_GRAPH:
             return {
                 ...state,
-                executionDiagramList: action.data
+                executionGraphList: action.data
             }
-        case GET_EXECUTION_DIAGRAM:
+        case GET_EXECUTION_GRAPH:
             return {
                 ...state,
-                selectedHistory: action.data
+                selectedExecution: action.data,
+                executionCurrentStage: 'execute'
             }
         case GET_EXECUTION_OVERVIEW:
             return {
@@ -44,32 +46,39 @@ export const PipelinePageReducer = (state, action) => {
         case 'UPDATE_EXECUTION_PAGE':
             return Object.assign({}, state, action.data)
         case ADD_OPERATORS_TO_FLOW_GRAPH:
+            let temperatePipelineGraphData = Object.assign({}, state.pipelineGraphData)
             let arr = []
             let maxNodeId;
-            if (state.pipelineData) {
-                state.pipelineData.filter(v => isNode(v)).map(v => arr.push(parseInt(v.id)))
+            if (temperatePipelineGraphData && temperatePipelineGraphData[state.pipelineCurrentStage]) {
+                temperatePipelineGraphData[state.pipelineCurrentStage].filter(v => isNode(v)).map(v => arr.push(parseInt(v.id)))
                 maxNodeId = arr.length === 0 ? 0 : Math.max.apply(null, arr)
             }
-            let id = !state.pipelineData ? 1 : (maxNodeId + 1);
+            let id = !temperatePipelineGraphData[state.pipelineCurrentStage] ? 1 : (maxNodeId + 1);
+            temperatePipelineGraphData[state.pipelineCurrentStage] = Object.assign([],
+                [{
+                    id: id + '',
+                    data: {
+                        label: id + '-' + action.data.name,
+                        name: action.data.name
+                    },
+                    type: 'pipelineNode',
+                    position: {x: 100, y: 50}
+                }].concat(temperatePipelineGraphData[state.pipelineCurrentStage] ? state.pipelineGraphData[state.pipelineCurrentStage] : []))
             return {
                 ...state,
-                pipelineData: Object.assign([],
-                    [{
-                        id: id + '',
-                        data: {
-                            label: id + '-' + action.data.name,
-                            name: action.data.name
-                        },
-                        type: 'pipelineNode',
-                        position: {x: 100, y: 50}
-                    }].concat(state.pipelineData ? state.pipelineData : []),
-                )
+                pipelineGraphData: temperatePipelineGraphData
             }
         case UPDATE_FLOW_GRAPH:
             return {
                 ...state,
-                pipelineData: action.data,
+                pipelineGraphData: action.data,
                 envSelectLoading: false
+            }
+        case UPDATE_GRAPH_STAGE:
+            return {
+                ...state,
+                pipelineCurrentStage: action.data.pipelineCurrentStage,
+                pipelineGraphData: action.data.pipelineGraphData
             }
         case EDIT_OPERATORS:
             return {
@@ -90,7 +99,8 @@ export const PipelinePageReducer = (state, action) => {
             return {
                 ...state,
                 selectedPipeline: action.data,
-                envSelectLoading: false
+                envSelectLoading: false,
+                pipelineCurrentStage: 'execute'
             }
         default:
             return {
@@ -164,13 +174,23 @@ export const freshPipelineListAction = (data) => (
         data: data
     }
 )
-export const editPipelineAction = (data) => (
+export const selectPipelineAction = (data) => (
     {
         type: EDIT_PIPELINES,
         data: data
     }
 )
 
-
+/*******************************************************************************************/
+export const UPDATE_GRAPH_STAGE = 'UPDATE_GRAPH_STAGE'
+export const updateGraphStage = (stage, pipelineGraphData) => (
+    {
+        type: UPDATE_GRAPH_STAGE,
+        data: {
+            pipelineCurrentStage: stage,
+            pipelineGraphData: pipelineGraphData
+        }
+    }
+)
 
 

@@ -2,10 +2,11 @@ import React, { Component } from "react";
 import './css/PipelineGraph.css'
 import {nodeTypes} from "./DataFlowNodeTypes";
 import ReactFlow, {addEdge, Controls, isEdge, isNode, MiniMap, removeElements} from "react-flow-renderer";
-import {Button, Form, Space, Input, Select, Spin, PageHeader} from "antd";
+import {Button, Form, Space, Input, Select, Spin, PageHeader, Tabs} from "antd";
 import {edgeTypes} from "./DataFlowEdgeType";
 import Modal from "antd/lib/modal/Modal";
 import { MinusCircleOutlined, PlusCircleTwoTone } from "@ant-design/icons";
+import { changePipelineGraphDataToPipelineObject } from "../../services/GraphService";
 const { Option } = Select;
 const tailLayout = {
     wrapperCol: { offset: 19, span: 5 },
@@ -16,6 +17,8 @@ const layout = {
     wrapperCol: { span: 22 },
 };
 
+const { TabPane } = Tabs;
+
 export class PipelineGraph extends React.Component {
     constructor(props, context) {
         super(props, context);
@@ -24,49 +27,49 @@ export class PipelineGraph extends React.Component {
     }
     
     onConnect = (params) => {
-        params['type'] = 'custom'
-        params['arrowHeadType'] = 'arrowclosed'
-        this.props.updateGraph(addEdge(params, this.props.pipelineData))
+        let graph = Object.assign({}, this.props.pipelineGraphData)
+        graph[this.props.pipelineCurrentStage] = addEdge(params, this.props.pipelineGraphData[this.props.pipelineCurrentStage])
+        this.props.updateGraph(graph)
     }
     onRemove = (params) => {
-        params.forEach(v => v['id'] = v['id'] + '');
-        params.forEach( v=> {if (v['source']) {v['id'] = v['source'] + '->' + v['target']}})
-        this.props.updateGraph(removeElements(params, this.props.pipelineData))
+        let graph = Object.assign({}, this.props.pipelineGraphData)
+        graph[this.props.pipelineCurrentStage] = removeElements(params, this.props.pipelineGraphData[this.props.pipelineCurrentStage])
+        this.props.updateGraph(graph)
     }
 
-    saveDiagram = () => {
+    getPipelineObj = () => {
         let obj = {
             name: this.props.selectedPipeline.name,
-            operators: {},
-            connections: [],
+            stages: {
+                before: {
+                    operators: {},
+                    connections: []
+                },
+                execute: {
+                    operators: {},
+                    connections: []
+                },
+                clean: {
+                    operators: {},
+                    connections: []
+                }
+            },
             environment: this.props.pipelineSelectedEnv ? this.props.pipelineSelectedEnv : this.props.selectedPipeline.environment,
             parameters: this.props.selectedPipeline.parameters
         }
         if (this.props.pipelineSelectedEnv === '') {
             obj['environment'] = null
         }
-        this.props.pipelineData.filter(v => isNode(v)).map(v => {
-            obj.operators[v['id']] = v.data.name;
-        });
-        this.props.pipelineData.filter(v => isEdge(v)).map(v => obj.connections.push(v.source + '->' + v.target));
-        this.props.updatePipeline(this.props.selectedPipeline.name, Object.assign({}, obj));
+        return obj;
     }
 
-    runDiagram = () => {
-        this.saveDiagram()
-        let obj = {
-            name: this.props.selectedPipeline.name,
-            pipelineName: this.props.selectedPipeline.name,
-            operators: {},
-            connections: [],
-            environment: this.props.pipelineSelectedEnv ? (this.props.pipelineSelectedEnv === '' ? null : this.props.pipelineSelectedEnv) : this.props.selectedPipeline.environment,
-            parameters: this.props.selectedPipeline.parameters
-        }
-        this.props.pipelineData.filter(v => isNode(v)).map(v => {
-            obj.operators[v['id']] = v.data.name
-        });
-        this.props.pipelineData.filter(v => isEdge(v)).map(v => obj.connections.push(v.source + '->' + v.target));
-        this.props.runPipeline(Object.assign({}, obj));
+    saveGraph = () => {
+        this.props.updatePipeline(this.props.selectedPipeline.name, changePipelineGraphDataToPipelineObject(this.props.pipelineGraphData, this.getPipelineObj()));
+    }
+
+    runGraph = () => {
+        this.saveGraph()
+        this.props.runPipeline(changePipelineGraphDataToPipelineObject(this.props.pipelineGraphData, this.getPipelineObj()));
     }
 
     onLoad = (reactFlowInstance) => {
@@ -84,6 +87,10 @@ export class PipelineGraph extends React.Component {
         } else {
             this.props.updatePipelinePageState('pipelineSelectedEnv', value)
         }
+    }
+
+    handleStageChange = (value) => {
+        this.props.handleStageChange(value, this.props.pipelineGraphData)
     }
 
     render() {
@@ -112,15 +119,23 @@ export class PipelineGraph extends React.Component {
                                     </Select>}
                                 <Button style={{marginLeft: '8px'}} key="params" type="primary" 
                                     onClick={() => this.props.updatePipelinePageState('pipelineParamsFormVisible', true)}>Parameters</Button>
-                                <Button style={{marginLeft: '8px'}} key="save" type="primary" onClick={this.saveDiagram}>Save</Button>
-                                <Button style={{marginLeft: '8px'}} key="run" danger onClick={this.runDiagram}>Run</Button>
+                                <Button style={{marginLeft: '8px'}} key="save" type="primary" onClick={this.saveGraph}>Save</Button>
+                                <Button style={{marginLeft: '8px'}} key="run" danger onClick={this.runGraph}>Run</Button>
                             </div>
                         ]}>
                     </PageHeader>
                 </div>
-                <div style={{height:'88%', width: '100%'}}>
+                <div style={{height:'48px', width: '100%', float: 'flex', flexDirection: 'row'}}>
+                    <Tabs onChange={this.handleStageChange} activeKey={this.props.pipelineCurrentStage}>
+                        <TabPane tab={<span style={{paddingLeft: '24px'}}>Stages:</span>} key="stages" disabled></TabPane>
+                        <TabPane tab="Before" key="before"></TabPane>
+                        <TabPane tab="Execute" key="execute"></TabPane>
+                        <TabPane tab="Clean" key="clean"></TabPane>
+                    </Tabs>
+                </div>
+                <div style={{height:'86%', width: '100%'}}>
                     <ReactFlow
-                        elements={this.props.pipelineData}
+                        elements={this.props.pipelineGraphData ? this.props.pipelineGraphData[this.props.pipelineCurrentStage] : undefined}
                         nodeTypes={nodeTypes}
                         edgeTypes={edgeTypes}
                         nodesDraggable={true}
@@ -128,7 +143,7 @@ export class PipelineGraph extends React.Component {
                         onElementClick={this.onElementClick}
                         onConnect={this.onConnect}
                         onElementsRemove={this.onRemove}
-                        defaultZoom={0.5}
+                        defaultZoom={0.7}
                 >
                         <MiniMap
                             nodeColor={(node) => {
@@ -236,7 +251,7 @@ export class PipelineParametersFormModal extends Component{
                             ))}
                             <Form.Item style={{width: '100%'}}>
                                 <Button type="dashed" onClick={() => add()} block icon={<PlusCircleTwoTone />}>
-                                    Add Check Condition
+                                    Add Parameter
                                 </Button>
                             </Form.Item>
                             </div>

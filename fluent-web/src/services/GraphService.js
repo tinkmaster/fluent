@@ -1,4 +1,6 @@
-export function drawExecutionGraph(data) {
+import {isEdge, isNode} from "react-flow-renderer";
+
+export function drawGraph(data) {
     let res = []
     let nodesHaveDrawn = {}
     let branchesNum = {}  // record nodes number in each level to split them in the graph
@@ -91,24 +93,41 @@ function drawNextNodes(data, parentId, id, pathLength, branchesNum, res, nodesHa
     }
 }
 
+export function drawExecutionGraph(data) {
+    let result = {
+        before: data.stages ? drawGraph({sources: data.stages.before.sources, nodes: data.stages.before.nodes}) : [],
+        execute: data.stages ? drawGraph({sources: data.stages.execute.sources, nodes: data.stages.execute.nodes}) : [],
+        clean: data.stages ? drawGraph({sources: data.stages.clean.sources, nodes: data.stages.clean.nodes}) : []
+    }
+    return Object.assign({}, result)
+}
 
 export function drawPipelineGraph(data) {
+    let result = {
+        before: data.stages ? calculateNodes(data.stages.before) : [],
+        execute: data.stages ?calculateNodes(data.stages.execute) : [],
+        clean: data.stages ?calculateNodes(data.stages.clean) : []
+    }
+    return Object.assign({}, result)
+}
+
+export function calculateNodes(graph) {
     let sources = []
     let nodes = {}
 
-    const ids = Object.keys(data.operators)
+    const ids = Object.keys(graph.operators)
     ids.map(id => {
             nodes[id] = {
                 next: [],
                 upstream: [],
                 operator: {
-                    name: data.operators[id]
+                    name: graph.operators[id]
                 }
             }
         }
     )
 
-    data.connections.map(con => {
+    graph.connections.map(con => {
         const ns = con.split('->')
         nodes[parseInt(ns[0])].next.push(parseInt(ns[1]))
         nodes[parseInt(ns[1])].upstream.push(parseInt(ns[0]))
@@ -121,5 +140,52 @@ export function drawPipelineGraph(data) {
         }
     )
 
-    return drawExecutionGraph({sources: sources, nodes: nodes});
+    return drawGraph({sources: sources, nodes: nodes});
 }
+
+export function redrawPipelineGraph(pipelineGraphData) {
+    let obj = {
+        stages: {
+            before: {
+                operators: {},
+                connections: []
+            },
+            execute: {
+                operators: {},
+                connections: []
+            },
+            clean: {
+                operators: {},
+                connections: []
+            }
+        }
+    }
+
+    obj = changePipelineGraphDataToPipelineObject(pipelineGraphData, obj)
+    return drawPipelineGraph(obj)
+}
+
+export function changePipelineGraphDataToPipelineObject(pipelineGraphData, obj) {
+    if (pipelineGraphData.before) {
+        pipelineGraphData.before.filter(v => isNode(v)).map(v => {
+            obj.stages.before.operators[v['id']] = v.data.name;
+        });
+        pipelineGraphData.before.filter(v => isEdge(v)).map(v => obj.stages.before.connections.push(v.source + '->' + v.target));
+    }
+    if (pipelineGraphData.execute) {
+        pipelineGraphData.execute.filter(v => isNode(v)).map(v => {
+            obj.stages.execute.operators[v['id']] = v.data.name;
+        });
+        pipelineGraphData.execute.filter(v => isEdge(v)).map(v => obj.stages.execute.connections.push(v.source + '->' + v.target));
+    }
+    if (pipelineGraphData.clean) {
+        pipelineGraphData.clean.filter(v => isNode(v)).map(v => {
+            obj.stages.clean.operators[v['id']] = v.data.name;
+        });
+    
+        pipelineGraphData.clean.filter(v => isEdge(v)).map(v => obj.stages.clean.connections.push(v.source + '->' + v.target));
+    }
+    return Object.assign({}, obj)
+}
+
+

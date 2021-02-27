@@ -7,15 +7,7 @@ export class OperatorList extends Component {
 
     constructor(props, context) {
         super(props, context);
-
-        // this.props = {
-        //     operators: [],
-        //     updatePipelinePageState: PropTypes.function,
-        //     addOperatorToGraph: PropTypes.function,
-        //     deleteOperator: PropTypes.function
-        // }
     }
-
 
     render() {
         return (
