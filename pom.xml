@@ -41,7 +41,7 @@
         <protobuf-maven-plugin.version>0.5.1</protobuf-maven-plugin.version>
         <okhttp.version>4.2.2</okhttp.version>
         <retrofit.version>2.5.0</retrofit.version>
-        <jackson.version>2.12.1</jackson.version>
+        <jackson.version>2.12.6.1</jackson.version>
         <maven-jar-plugin.version>3.0.2</maven-jar-plugin.version>
     </properties>
     <dependencyManagement>
